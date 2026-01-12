@@ -34,7 +34,7 @@ pip install gs2txt
 ```python
 import pandas as pd
 from gs2txt import GeneSetAnnotator
-from gs2txt.llm.base import OpenAIProvider
+from gs2txt.llm import OpenAIProvider
 
 # Your differential expression results
 deg_df = pd.DataFrame({
@@ -74,7 +74,7 @@ checkpoints and apoptotic responses to genomic stress.
 ### Example 1: Use Anthropic Claude
 
 ```python
-from gs2txt.llm.base import AnthropicProvider
+from gs2txt.llm import AnthropicProvider
 
 provider = AnthropicProvider(
     api_key="your-anthropic-key",
