@@ -1,0 +1,10 @@
+cluster,gene,logFC,pvalue
+cluster_1,TP53,2.3,0.001
+cluster_1,MYC,1.8,0.002
+cluster_1,BRCA1,-1.5,0.003
+cluster_2,CD4,1.5,0.001
+cluster_2,CD8A,1.2,0.002
+cluster_2,IL2,1.4,0.003
+cluster_3,EGFR,2.1,0.001
+cluster_3,KRAS,1.9,0.002
+cluster_3,BRAF,1.7,0.003

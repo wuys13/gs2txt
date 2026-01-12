@@ -69,6 +69,103 @@ checkpoints and apoptotic responses to genomic stress.
 
 ---
 
+## 🖥️ Command-Line Interface
+
+### CLI Installation
+
+After installing gs2txt, the `gs2txt` command will be available:
+
+```bash
+pip install gs2txt
+# or for development
+pip install -e .
+```
+
+### CLI Usage
+
+Process gene sets from CSV files directly from the command line:
+
+```bash
+gs2txt --input genes.csv --output results.csv --api-key YOUR_API_KEY
+```
+
+#### Required Arguments
+
+- `-i, --input`: Input CSV file containing gene data (must have a 'gene' column)
+- `-o, --output`: Output CSV file path for annotated results
+
+#### LLM Configuration
+
+- `--provider`: LLM provider (`openai`, `anthropic`, `litellm`; default: `openai`)
+- `--api-key`: API key (or set `GS2TXT_API_KEY` environment variable)
+- `--model`: Model ID (default: `gpt-4`)
+- `--temperature`: Sampling temperature (default: `0.0`)
+
+#### Annotation Parameters
+
+- `--max-genes`: Maximum number of genes to include (default: `60`)
+- `--max-pathways`: Maximum number of pathways to include (default: `10`)
+- `--enrichment`: Enrichment method (`pathway`, `none`; default: `pathway`)
+- `--group-by`: Column name to group by (e.g., `cluster`, `celltype`)
+
+#### Example Commands
+
+**Basic usage with OpenAI:**
+```bash
+gs2txt --input data/deg_results.csv --output data/annotated_results.csv \
+       --api-key sk-xxx --model gpt-4
+```
+
+**Process multiple clusters:**
+```bash
+# Input CSV should have 'gene' and 'cluster' columns
+gs2txt --input data/clusters.csv --output data/cluster_annotations.csv \
+       --api-key sk-xxx --group-by cluster
+```
+
+**Use Anthropic Claude:**
+```bash
+gs2txt --input genes.csv --output results.csv \
+       --provider anthropic --api-key sk-ant-xxx \
+       --model claude-sonnet-4-20250514
+```
+
+**Use environment variables:**
+```bash
+export GS2TXT_API_KEY=sk-xxx
+export GS2TXT_PROVIDER=openai
+export GS2TXT_MODEL=gpt-4
+
+gs2txt --input genes.csv --output results.csv
+```
+
+#### Input File Format
+
+The input CSV must contain a `gene` column:
+
+```csv
+gene,logFC,pvalue
+TP53,2.3,0.001
+MYC,1.8,0.002
+BRCA1,-1.5,0.003
+```
+
+For grouped processing, add a grouping column:
+
+```csv
+cluster,gene,logFC
+cluster_1,TP53,2.3
+cluster_1,MYC,1.8
+cluster_2,CD4,1.5
+cluster_2,CD8A,1.2
+```
+
+#### Output Format
+
+The output CSV will contain all original columns plus an `annotation` column with the LLM-generated biological process descriptions.
+
+---
+
 ## 📖 Usage Examples
 
 ### Example 1: Use Anthropic Claude
@@ -86,7 +183,41 @@ annotator = GeneSetAnnotator(llm_provider=provider)
 result = annotator.annotate(deg_df)
 ```
 
-### Example 2: Use pre-computed pathways
+### Example 2: All Available Parameters
+
+```python
+from gs2txt import GeneSetAnnotator
+from gs2txt.llm import OpenAIProvider
+
+# Configure LLM provider with all options
+provider = OpenAIProvider(
+    api_key="your-openai-key",
+    model_id="gpt-4",              # Model to use
+    temperature=0.0,                # Sampling temperature (0.0-1.0)
+    base_url=None                   # Optional: custom API endpoint
+)
+
+# Create annotator with all options
+annotator = GeneSetAnnotator(
+    llm_provider=provider,
+    enrichment_method="pathway",    # "pathway", "custom", or None
+    prompt_builder=None             # Optional: custom PromptBuilder
+)
+
+# Annotate with all parameters
+result = annotator.annotate(
+    deg_df,                         # DataFrame with 'gene' column
+    max_gene_num=60,                # Maximum genes to include
+    max_pathway_num=10,             # Maximum pathways to include
+    pathways=None,                  # Optional: pre-computed pathway list
+    compute_enrichment=True,        # Whether to run enrichment
+    additional_context=None         # Optional: extra context string
+)
+
+print(result)  # Returns: str (LLM annotation text)
+```
+
+### Example 3: Use pre-computed pathways
 
 ```python
 pathways = [
