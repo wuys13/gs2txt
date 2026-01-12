@@ -1,0 +1,23 @@
+# data/logs files
+raw_data/
+plot/
+results/
+output/
+resource/
+resource
+
+0_records
+logs
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+*.tar.gz
+
+
+AGENTS.md
+CLAUDE.md
+# Todo.txt
+
+
