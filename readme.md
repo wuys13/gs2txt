@@ -2,11 +2,11 @@
 
 > LLM-powered biological process annotation for gene sets
 
-[![PyPI version](https://badge.fury.io/py/geneset-annotator.svg)](https://badge.fury.io/py/geneset-annotator)
-[![Tests](https://github.com/yourusername/geneset-annotator/workflows/tests/badge.svg)](https://github.com/yourusername/geneset-annotator/actions)
+[![PyPI version](https://badge.fury.io/py/gs2txt.svg)](https://badge.fury.io/py/gs2txt)
+[![Tests](https://github.com/wuys13/gs2txt/workflows/tests/badge.svg)](https://github.com/wuys13/gs2txt/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-**geneset-annotator** uses large language models to generate concise, biologically meaningful descriptions of gene sets. It intelligently combines gene functions with pathway enrichment results to infer the dominant biological process.
+**gs2txt** uses large language models to generate concise, biologically meaningful descriptions of gene sets. It intelligently combines gene functions with pathway enrichment results to infer the dominant biological process.
 
 ---
 
@@ -34,7 +34,7 @@ pip install gs2txt
 ```python
 import pandas as pd
 from gs2txt import GeneSetAnnotator
-from gs2txt.llm import OpenAIProvider
+from gs2txt.llm.base import OpenAIProvider
 
 # Your differential expression results
 deg_df = pd.DataFrame({
@@ -45,11 +45,12 @@ deg_df = pd.DataFrame({
 # Setup LLM provider
 provider = OpenAIProvider(
     api_key="your-openai-key",
-    model_id="gpt-4"
+    model_id="gpt-4",
+    temperature=0.0
 )
 
 # Create annotator
-annotator = GeneSetAnnotator(provider)
+annotator = GeneSetAnnotator(llm_provider=provider)
 
 # Generate annotation
 result = annotator.annotate(deg_df)
@@ -73,18 +74,19 @@ checkpoints and apoptotic responses to genomic stress.
 ### Example 1: Use Anthropic Claude
 
 ```python
-from gs2txt.llm import AnthropicProvider
+from gs2txt.llm.base import AnthropicProvider
 
 provider = AnthropicProvider(
     api_key="your-anthropic-key",
-    model_id="claude-sonnet-4-20250514"
+    model_id="claude-sonnet-4-20250514",
+    temperature=0.0
 )
 
-annotator = GeneSetAnnotator(provider)
+annotator = GeneSetAnnotator(llm_provider=provider)
 result = annotator.annotate(deg_df)
 ```
 
-### Example 2: Skip enrichment with pre-computed pathways
+### Example 2: Use pre-computed pathways
 
 ```python
 pathways = [
@@ -93,10 +95,10 @@ pathways = [
     "Cytokine signaling"
 ]
 
+# Pathways will be used directly, enrichment will be skipped
 result = annotator.annotate(
     deg_df,
-    pathways=pathways,
-    compute_enrichment=False
+    pathways=pathways
 )
 ```
 
@@ -115,17 +117,20 @@ result = annotator.annotate(
 )
 ```
 
-### Example 4: Batch process CSV
+### Example 4: Batch process multiple gene sets
 
 ```python
-from gs2txt.batch import run_batch_annotation
+# Process multiple gene sets
+gene_sets = {
+    "cluster_1": deg_df_1,
+    "cluster_2": deg_df_2,
+    "cluster_3": deg_df_3
+}
 
-run_batch_annotation(
-    provider=provider,
-    input_csv="all_clusters_degs.csv",  # has 'cluster' and 'gene' columns
-    output_csv="annotated_clusters.csv",
-    group_col="cluster"
-)
+results = {}
+for name, df in gene_sets.items():
+    results[name] = annotator.annotate(df)
+    print(f"{name}: {results[name]}")
 ```
 
 ### Example 5: Custom prompt template
@@ -171,13 +176,15 @@ annotator = GeneSetAnnotator(provider)
 
 ```python
 from gs2txt.enrichment import BaseEnrichment
+import pandas as pd
 
 class MyEnrichment(BaseEnrichment):
-    def enrich(self, genes, **kwargs):
+    def enrich(self, genes: list, **kwargs) -> pd.DataFrame:
         # Your enrichment logic
+        # Return DataFrame with 'Term' and 'Adjusted P-value' columns
         return pd.DataFrame({
-            "Term": [...],
-            "Adjusted P-value": [...]
+            "Term": ["pathway1", "pathway2"],
+            "Adjusted P-value": [0.01, 0.02]
         })
 
 annotator = GeneSetAnnotator(
@@ -221,8 +228,8 @@ Contributions welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md).
 ### Development Setup
 
 ```bash
-git clone https://github.com/yourusername/geneset-annotator.git
-cd geneset-annotator
+git clone https://github.com/wuys13/gs2txt.git
+cd gs2txt
 pip install -e ".[dev]"
 pre-commit install
 ```
@@ -245,8 +252,8 @@ MIT License - see [LICENSE](LICENSE) file.
 
 ## 📧 Contact
 
-- **Issues**: [GitHub Issues](https://github.com/yourusername/geneset-annotator/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/yourusername/geneset-annotator/discussions)
+- **Issues**: [GitHub Issues](https://github.com/wuys13/gs2txt/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/wuys13/gs2txt/discussions)
 - **Email**: 80359555@qq.com
 
 ---
