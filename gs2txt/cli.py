@@ -102,6 +102,30 @@ For more information, visit: https://github.com/wuys13/gs2txt
         help="Column name to group by (e.g., 'cluster', 'celltype')"
     )
 
+    # Differential gene filtering parameters
+    parser.add_argument(
+        "--pvalue-threshold",
+        type=float,
+        default=0.05,
+        help="P-value threshold for gene filtering (default: 0.05)"
+    )
+    parser.add_argument(
+        "--log2fc-threshold",
+        type=float,
+        default=1.0,
+        help="Log2 fold-change threshold for gene filtering (default: 1.0)"
+    )
+    parser.add_argument(
+        "--pvalue-column",
+        default="pvalue",
+        help="Column name for p-values (default: pvalue)"
+    )
+    parser.add_argument(
+        "--log2fc-column",
+        default="logFC",
+        help="Column name for log2FC (default: logFC)"
+    )
+
     return parser
 
 
@@ -172,7 +196,12 @@ def main():
             output_path=config.output_file,
             group_column=config.group_column,
             max_gene_num=config.max_gene_num,
-            max_pathway_num=config.max_pathway_num
+            max_pathway_num=config.max_pathway_num,
+            # Differential gene filtering parameters
+            pvalue_threshold=config.pvalue_threshold,
+            log2fc_threshold=config.log2fc_threshold,
+            pvalue_column=config.pvalue_column,
+            log2fc_column=config.log2fc_column
         )
     except FileNotFoundError as e:
         print(f"Error: {e}", file=sys.stderr)

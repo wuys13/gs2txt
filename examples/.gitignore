@@ -1,4 +1,5 @@
 
 # Example outputs
-examples/output*.csv
-examples/*.csv
+output*.csv
+temp_filtered.csv
+output_with_annotations.csv

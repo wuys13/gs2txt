@@ -45,34 +45,43 @@ class BatchProcessor:
         Returns
         -------
         pd.DataFrame
-            Original data + 'annotation' column with LLM results
+            Summary data with columns: gs, annotation, pathways, PPIs, Final_prompt
         """
         # Get unique groups
         groups = df[group_column].unique()
 
         # Process each group with progress bar
-        annotations = {}
+        results = []
         for group in tqdm(groups, desc="Processing gene sets"):
             # Get genes for this group
             group_df = df[df[group_column] == group]
 
-            # Annotate
+            # Annotate with detailed info
             try:
-                annotation = self.annotator.annotate(group_df, **annotate_kwargs)
-                annotations[group] = annotation
+                detailed = self.annotator.annotate_detailed(group_df, **annotate_kwargs)
+                results.append({
+                    "gs": group,
+                    "annotation": detailed["annotation"],
+                    "pathways": detailed["pathways"],
+                    "PPIs": detailed["ppis"],
+                    "Final_prompt": detailed["final_prompt"],
+                })
             except Exception as e:
                 print(f"Warning: Failed to annotate {group}: {e}")
-                annotations[group] = f"Process: Failed - {str(e)}"
+                results.append({
+                    "gs": group,
+                    "annotation": "",
+                    "pathways": "",
+                    "PPIs": "",
+                    "Final_prompt": "",
+                })
 
-        # Create annotation column by mapping group to annotation
-        df_result = df.copy()
-        df_result["annotation"] = df_result[group_column].map(annotations)
-
-        return df_result
+        return pd.DataFrame(results)
 
     def process_single_geneset(
         self,
         df: pd.DataFrame,
+        gs_name: str = "gene_set",
         **annotate_kwargs
     ) -> pd.DataFrame:
         """
@@ -82,26 +91,35 @@ class BatchProcessor:
         ----------
         df : pd.DataFrame
             Input data with gene column
+        gs_name : str
+            Name for this gene set (used in output 'gs' column)
         **annotate_kwargs
             Parameters passed to annotate() method
 
         Returns
         -------
         pd.DataFrame
-            Original data + 'annotation' column with LLM results
+            Summary data with columns: gs, annotation, pathways, PPIs, Final_prompt
         """
-        # Annotate the entire dataset as one gene set
+        # Annotate the entire dataset as one gene set with detailed info
         try:
-            annotation = self.annotator.annotate(df, **annotate_kwargs)
+            detailed = self.annotator.annotate_detailed(df, **annotate_kwargs)
+            return pd.DataFrame([{
+                "gs": gs_name,
+                "annotation": detailed["annotation"],
+                "pathways": detailed["pathways"],
+                "PPIs": detailed["ppis"],
+                "Final_prompt": detailed["final_prompt"]
+            }])
         except Exception as e:
             print(f"Warning: Annotation failed: {e}")
-            annotation = f"Process: Failed - {str(e)}"
-
-        # Add annotation column to all rows
-        df_result = df.copy()
-        df_result["annotation"] = annotation
-
-        return df_result
+            return pd.DataFrame([{
+                "gs": gs_name,
+                "annotation": "",
+                "pathways": "",
+                "PPIs": "",
+                "Final_prompt": ""
+            }])
 
     def process_single_file(
         self,
@@ -124,6 +142,8 @@ class BatchProcessor:
         **annotate_kwargs
             Parameters passed to annotate() method
         """
+        from pathlib import Path
+
         # Read CSV
         print(f"Reading input file: {input_path}")
         df = CSVReader.read_gene_file(input_path, group_column)
@@ -133,8 +153,10 @@ class BatchProcessor:
             print(f"Processing {len(df[group_column].unique())} gene sets grouped by '{group_column}'...")
             results = self.process_grouped_data(df, group_column, **annotate_kwargs)
         else:
-            print(f"Processing single gene set with {len(df)} genes...")
-            results = self.process_single_geneset(df, **annotate_kwargs)
+            # Use input filename (without extension) as gs name
+            gs_name = Path(input_path).stem
+            print(f"Processing single gene set '{gs_name}' with {len(df)} genes...")
+            results = self.process_single_geneset(df, gs_name=gs_name, **annotate_kwargs)
 
         # Write results
         print(f"Writing results to: {output_path}")

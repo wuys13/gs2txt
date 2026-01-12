@@ -24,6 +24,12 @@ class Config:
     enrichment_method: str = "pathway"
     compute_enrichment: bool = True
 
+    # Differential gene filtering settings
+    pvalue_threshold: float = 0.05
+    log2fc_threshold: float = 1.0
+    pvalue_column: str = "pvalue"
+    log2fc_column: str = "logFC"
+
     # File I/O
     input_file: Optional[str] = None
     output_file: Optional[str] = None
@@ -89,3 +95,13 @@ class Config:
             else:
                 self.enrichment_method = args.enrichment
                 self.compute_enrichment = True
+
+        # Differential gene filtering settings
+        if hasattr(args, "pvalue_threshold") and args.pvalue_threshold is not None:
+            self.pvalue_threshold = args.pvalue_threshold
+        if hasattr(args, "log2fc_threshold") and args.log2fc_threshold is not None:
+            self.log2fc_threshold = args.log2fc_threshold
+        if hasattr(args, "pvalue_column") and args.pvalue_column:
+            self.pvalue_column = args.pvalue_column
+        if hasattr(args, "log2fc_column") and args.log2fc_column:
+            self.log2fc_column = args.log2fc_column
