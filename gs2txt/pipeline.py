@@ -5,9 +5,8 @@ Stage 1 (Preprocess): Read DEG + enrichment files, filter, build prompts, save i
 Stage 2 (Annotate): Read intermediate, call LLM, save final results
 """
 
-import os
 from pathlib import Path
-from typing import Optional, List, Dict, Any
+from typing import Optional
 
 import pandas as pd
 from tqdm import tqdm
@@ -52,7 +51,7 @@ class TwoStagePipeline:
         pvalue_column: str = "pvalue",
         log2fc_column: str = "logFC",
         max_gene_num: int = 60,
-    ) -> List[str]:
+    ) -> list[str]:
         """
         Filter genes by statistical criteria.
 
@@ -107,7 +106,7 @@ class TwoStagePipeline:
         pvalue_column: str = "Adjusted P-value",
         term_column: str = "Term",
         max_pathway_num: int = 10,
-    ) -> List[str]:
+    ) -> list[str]:
         """
         Filter pathways by p-value.
 
@@ -157,7 +156,7 @@ class TwoStagePipeline:
         output_file: str,
         config_file: Optional[str] = None,
         group_column: str = "cluster",
-        ppi_context: Optional[Dict[str, str]] = None,
+        ppi_context: Optional[dict[str, str]] = None,
     ) -> pd.DataFrame:
         """
         Stage 1: Preprocess DEG and enrichment data.
@@ -358,7 +357,7 @@ class TwoStagePipeline:
         results = []
         for _, row in tqdm(inter_df.iterrows(), total=len(inter_df), desc="Generating annotations"):
             gs = row["gs"]
-            genes = row.get("genes", "")
+            row.get("genes", "")
             pathways = row.get("pathways", "")
             ppis = row.get("ppis", "")
             final_prompt = row.get("final_prompt", "")
@@ -405,7 +404,7 @@ class TwoStagePipeline:
     def preprocess_batch(
         config_file: str,
         output_file: str = "intermediate.csv",
-        ppi_context: Optional[Dict[str, str]] = None,
+        ppi_context: Optional[dict[str, str]] = None,
     ) -> pd.DataFrame:
         """
         Batch preprocess: Scan DEG folder, find matching pathway files in multiple folders.

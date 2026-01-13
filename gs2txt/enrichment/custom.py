@@ -2,15 +2,16 @@
 Custom enrichment from user-provided results for gs2txt.
 """
 
-from typing import List
+
 import pandas as pd
+
 from .base import BaseEnrichment
 
 
 class CustomEnrichment(BaseEnrichment):
     """Custom enrichment from user-provided results."""
 
-    def __init__(self, terms: List[str]):
+    def __init__(self, terms: list[str]):
         """
         Initialize with pre-computed enrichment terms.
 
@@ -21,7 +22,7 @@ class CustomEnrichment(BaseEnrichment):
         """
         self.terms = terms
 
-    def enrich(self, genes: List[str], **kwargs) -> pd.DataFrame:
+    def enrich(self, genes: list[str], **kwargs) -> pd.DataFrame:
         """
         Return pre-computed enrichment terms as DataFrame.
 

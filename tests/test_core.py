@@ -2,14 +2,14 @@
 Unit tests for gs2txt core functionality.
 """
 
-import pytest
-import pandas as pd
 from unittest.mock import Mock, patch
 
-from gs2txt import GeneSetAnnotator
-from gs2txt.llm.base import BaseLLMProvider
-from gs2txt.enrichment.custom import CustomEnrichment
+import pandas as pd
+import pytest
 
+from gs2txt import GeneSetAnnotator
+from gs2txt.enrichment.custom import CustomEnrichment
+from gs2txt.llm.base import BaseLLMProvider
 
 # ============================================
 # Fixtures
@@ -136,7 +136,7 @@ def test_max_gene_num_limit(sample_deg_df, mock_llm_provider):
         llm_provider=mock_llm_provider, enrichment_method=None
     )
 
-    result = annotator.annotate(
+    annotator.annotate(
         sample_deg_df, max_gene_num=3, compute_enrichment=False
     )
 
@@ -155,7 +155,7 @@ def test_additional_context(sample_deg_df, mock_llm_provider):
     )
 
     context = "PPI hub genes: TP53, MYC"
-    result = annotator.annotate(
+    annotator.annotate(
         sample_deg_df, additional_context=context, compute_enrichment=False
     )
 

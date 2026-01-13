@@ -2,7 +2,7 @@
 OpenAI API provider for gs2txt.
 """
 
-from typing import List, Dict
+
 from .base import BaseLLMProvider
 
 
@@ -27,7 +27,7 @@ class OpenAIProvider(BaseLLMProvider):
 
         self.client = OpenAI(api_key=api_key, base_url=base_url)
 
-    def generate(self, messages: List[Dict[str, str]]) -> str:
+    def generate(self, messages: list[dict[str, str]]) -> str:
         """
         Generate response using OpenAI API.
 

@@ -3,7 +3,7 @@ Enrichment analysis base class for gs2txt.
 """
 
 from abc import ABC, abstractmethod
-from typing import List
+
 import pandas as pd
 
 
@@ -11,7 +11,7 @@ class BaseEnrichment(ABC):
     """Abstract base class for enrichment analysis."""
 
     @abstractmethod
-    def enrich(self, genes: List[str], **kwargs) -> pd.DataFrame:
+    def enrich(self, genes: list[str], **kwargs) -> pd.DataFrame:
         """
         Perform enrichment analysis.
 

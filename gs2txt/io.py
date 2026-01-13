@@ -2,9 +2,10 @@
 CSV input/output handlers for gs2txt.
 """
 
-import pandas as pd
 from pathlib import Path
 from typing import Optional
+
+import pandas as pd
 
 
 class CSVReader:
@@ -44,7 +45,7 @@ class CSVReader:
         try:
             df = pd.read_csv(file_path)
         except Exception as e:
-            raise ValueError(f"Error reading CSV file: {e}")
+            raise ValueError(f"Error reading CSV file: {e}") from e
 
         # Validate 'gene' column exists
         if "gene" not in df.columns:
@@ -96,4 +97,4 @@ class CSVWriter:
         try:
             results.to_csv(output_path, index=False)
         except Exception as e:
-            raise IOError(f"Error writing results to {output_path}: {e}")
+            raise OSError(f"Error writing results to {output_path}: {e}") from e

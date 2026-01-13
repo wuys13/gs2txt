@@ -3,8 +3,8 @@ Configuration management for gs2txt.
 """
 
 import os
+from dataclasses import dataclass
 from typing import Optional
-from dataclasses import dataclass, field
 
 
 @dataclass

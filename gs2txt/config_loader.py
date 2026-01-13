@@ -3,9 +3,9 @@ YAML configuration loader for gs2txt two-stage pipeline.
 """
 
 import os
-from pathlib import Path
-from typing import Optional, List
 from dataclasses import dataclass, field
+from pathlib import Path
+from typing import Optional
 
 try:
     import yaml
@@ -56,7 +56,7 @@ class PipelineConfig:
 
     # Input paths (for batch processing)
     deg_dir: Optional[str] = None
-    pathway_dirs: List[str] = field(default_factory=list)
+    pathway_dirs: list[str] = field(default_factory=list)
 
     # Gene filtering
     gene_pvalue_threshold: float = 0.05
@@ -116,7 +116,7 @@ class PipelineConfig:
         if not file_path.exists():
             raise FileNotFoundError(f"Config file not found: {file_path}")
 
-        with open(file_path, "r", encoding="utf-8") as f:
+        with open(file_path, encoding="utf-8") as f:
             data = yaml.safe_load(f)
 
         if data is None:

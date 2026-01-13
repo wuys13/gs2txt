@@ -2,8 +2,9 @@
 Batch processing utilities for gs2txt.
 """
 
-import pandas as pd
 from typing import Optional
+
+import pandas as pd
 from tqdm import tqdm
 
 from .core import GeneSetAnnotator

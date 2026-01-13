@@ -2,12 +2,11 @@
 Tests for CSV I/O handlers.
 """
 
-import pytest
+
 import pandas as pd
-from pathlib import Path
+import pytest
 
 from gs2txt.io import CSVReader, CSVWriter
-
 
 # ============================================
 # Test CSV Reader

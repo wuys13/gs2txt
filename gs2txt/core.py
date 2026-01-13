@@ -2,11 +2,13 @@
 Core annotation API for gs2txt.
 """
 
+from typing import Any, Optional, Union
+
 import pandas as pd
-from typing import List, Optional, Union, Dict, Any, Tuple
-from .llm.base import BaseLLMProvider
-from .enrichment.base import BaseEnrichment
+
 from .enrichment import create_enrichment
+from .enrichment.base import BaseEnrichment
+from .llm.base import BaseLLMProvider
 from .prompts.builder import PromptBuilder
 
 
@@ -64,7 +66,7 @@ class GeneSetAnnotator:
         pvalue_column: str = "pvalue",
         log2fc_column: str = "logFC",
         max_gene_num: int = 60,
-    ) -> List[str]:
+    ) -> list[str]:
         """
         Filter genes by statistical criteria (pvalue, log2FC, gene count).
 
@@ -124,7 +126,7 @@ class GeneSetAnnotator:
         deg_df: pd.DataFrame,
         max_gene_num: int = 60,
         max_pathway_num: int = 10,
-        pathways: Optional[List[str]] = None,
+        pathways: Optional[list[str]] = None,
         compute_enrichment: bool = True,
         additional_context: Optional[str] = None,
         # Differential gene filtering parameters
@@ -236,7 +238,7 @@ class GeneSetAnnotator:
         deg_df: pd.DataFrame,
         max_gene_num: int = 60,
         max_pathway_num: int = 10,
-        pathways: Optional[List[str]] = None,
+        pathways: Optional[list[str]] = None,
         compute_enrichment: bool = True,
         additional_context: Optional[str] = None,
         # Differential gene filtering parameters
@@ -244,7 +246,7 @@ class GeneSetAnnotator:
         log2fc_threshold: float = 1.0,
         pvalue_column: str = "pvalue",
         log2fc_column: str = "logFC",
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Annotate a gene set with biological process description and return detailed info.
 
@@ -354,7 +356,7 @@ def annotate_gene_set_with_llm(
     deg_df: pd.DataFrame,
     max_gene_num: int = 60,
     max_pathway_num: int = 10,
-    pathways: Optional[List[str]] = None,
+    pathways: Optional[list[str]] = None,
     compute_pathway_if_missing: bool = True,
     geneset_file=None,
     model_id: str = "gpt-4",

@@ -2,7 +2,7 @@
 LiteLLM unified provider for gs2txt.
 """
 
-from typing import List, Dict
+
 from .base import BaseLLMProvider
 
 
@@ -29,7 +29,7 @@ class LiteLLMProvider(BaseLLMProvider):
             api_key=api_key, base_url=base_url or "https://litellm.thesaisai.com/"
         )
 
-    def generate(self, messages: List[Dict[str, str]]) -> str:
+    def generate(self, messages: list[dict[str, str]]) -> str:
         """
         Generate response using LiteLLM API.
 

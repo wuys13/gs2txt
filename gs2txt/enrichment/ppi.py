@@ -2,8 +2,9 @@
 PPI network-based enrichment (placeholder) for gs2txt.
 """
 
-from typing import List
+
 import pandas as pd
+
 from .base import BaseEnrichment
 
 
@@ -21,7 +22,7 @@ class PPIEnrichment(BaseEnrichment):
         """
         self.confidence_cutoff = confidence_cutoff
 
-    def enrich(self, genes: List[str], **kwargs) -> pd.DataFrame:
+    def enrich(self, genes: list[str], **kwargs) -> pd.DataFrame:
         """
         Perform PPI-based enrichment (not yet implemented).
 

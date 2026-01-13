@@ -2,7 +2,7 @@
 Anthropic Claude API provider for gs2txt.
 """
 
-from typing import List, Dict
+
 from .base import BaseLLMProvider
 
 
@@ -25,7 +25,7 @@ class AnthropicProvider(BaseLLMProvider):
 
         self.client = Anthropic(api_key=api_key)
 
-    def generate(self, messages: List[Dict[str, str]]) -> str:
+    def generate(self, messages: list[dict[str, str]]) -> str:
         """
         Generate response using Anthropic API.
 

@@ -2,12 +2,12 @@
 Tests for batch processing.
 """
 
-import pytest
-import pandas as pd
 from unittest.mock import Mock
 
-from gs2txt.batch import BatchProcessor
+import pandas as pd
+import pytest
 
+from gs2txt.batch import BatchProcessor
 
 # ============================================
 # Fixtures

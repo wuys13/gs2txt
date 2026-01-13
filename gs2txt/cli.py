@@ -5,10 +5,10 @@ Command-line interface for gs2txt.
 import argparse
 import sys
 
-from .config import Config
 from .batch import BatchProcessor
+from .config import Config
 from .core import GeneSetAnnotator
-from .llm import OpenAIProvider, AnthropicProvider, LiteLLMProvider
+from .llm import AnthropicProvider, LiteLLMProvider, OpenAIProvider
 
 
 def create_parser() -> argparse.ArgumentParser:

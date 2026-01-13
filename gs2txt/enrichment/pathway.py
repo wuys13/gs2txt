@@ -2,8 +2,9 @@
 Pathway enrichment using GSEApy for gs2txt.
 """
 
-from typing import List
+
 import pandas as pd
+
 from .base import BaseEnrichment
 
 
@@ -11,7 +12,7 @@ class PathwayEnrichment(BaseEnrichment):
     """Pathway enrichment using GSEApy."""
 
     def __init__(
-        self, gene_sets: List[str] = None, organism: str = "Human", cutoff: float = 0.05
+        self, gene_sets: list[str] = None, organism: str = "Human", cutoff: float = 0.05
     ):
         """
         Initialize pathway enrichment.
@@ -33,7 +34,7 @@ class PathwayEnrichment(BaseEnrichment):
         self.organism = organism
         self.cutoff = cutoff
 
-    def enrich(self, genes: List[str], **kwargs) -> pd.DataFrame:
+    def enrich(self, genes: list[str], **kwargs) -> pd.DataFrame:
         """
         Perform pathway enrichment using GSEApy.
 

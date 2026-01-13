@@ -2,13 +2,11 @@
 Tests for CLI interface.
 """
 
+from unittest.mock import Mock, patch
+
 import pytest
-import sys
-from unittest.mock import Mock, patch, MagicMock
 
 from gs2txt.cli import create_parser, main
-from gs2txt.config import Config
-
 
 # ============================================
 # Test Argument Parser

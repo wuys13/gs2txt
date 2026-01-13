@@ -3,8 +3,8 @@ Enrichment analysis methods for gs2txt.
 """
 
 from .base import BaseEnrichment
-from .pathway import PathwayEnrichment
 from .custom import CustomEnrichment
+from .pathway import PathwayEnrichment
 from .ppi import PPIEnrichment
 
 

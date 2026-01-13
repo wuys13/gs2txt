@@ -3,7 +3,6 @@ LLM Provider abstraction for gs2txt.
 """
 
 from abc import ABC, abstractmethod
-from typing import List, Dict
 
 
 class BaseLLMProvider(ABC):
@@ -27,7 +26,7 @@ class BaseLLMProvider(ABC):
         self.config = kwargs
 
     @abstractmethod
-    def generate(self, messages: List[Dict[str, str]]) -> str:
+    def generate(self, messages: list[dict[str, str]]) -> str:
         """
         Generate response from messages.
 
