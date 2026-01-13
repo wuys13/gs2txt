@@ -73,8 +73,9 @@ Repository = "https://github.com/wuys13/gs2txt"
 Issues = "https://github.com/wuys13/gs2txt/issues"
 Documentation = "https://wuys13.github.io/gs2txt/"
 
-[tool.setuptools]
-packages = ["gs2txt"]
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["gs2txt*"]
 
 [tool.setuptools.package-data]
 gs2txt = ["py.typed"]
