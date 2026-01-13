@@ -19,6 +19,12 @@ def mock_annotator():
     """Mock annotator for testing."""
     annotator = Mock()
     annotator.annotate.return_value = "Process: Test annotation"
+    annotator.annotate_detailed.return_value = {
+        "annotation": "Process: Test annotation",
+        "pathways": "Test pathway",
+        "ppis": "Test PPI",
+        "final_prompt": "Test prompt"
+    }
     return annotator
 
 
@@ -44,13 +50,13 @@ def test_process_grouped_data(mock_annotator):
     result = processor.process_grouped_data(df, "cluster")
 
     assert "annotation" in result.columns
-    assert mock_annotator.annotate.call_count == 2  # 2 clusters
-    assert len(result) == 4
+    assert mock_annotator.annotate_detailed.call_count == 2  # 2 clusters
+    assert len(result) == 2  # 2 groups, not 4 rows
     assert result["annotation"].notna().all()
 
 
 def test_process_grouped_data_with_kwargs(mock_annotator):
-    """Test that kwargs are passed to annotate."""
+    """Test that kwargs are passed to annotate_detailed."""
     df = pd.DataFrame({
         "cluster": ["A", "A"],
         "gene": ["TP53", "MYC"]
@@ -64,16 +70,16 @@ def test_process_grouped_data_with_kwargs(mock_annotator):
         max_pathway_num=5
     )
 
-    # Verify annotate was called with kwargs
-    mock_annotator.annotate.assert_called_once()
-    call_kwargs = mock_annotator.annotate.call_args[1]
+    # Verify annotate_detailed was called with kwargs
+    mock_annotator.annotate_detailed.assert_called_once()
+    call_kwargs = mock_annotator.annotate_detailed.call_args[1]
     assert call_kwargs["max_gene_num"] == 50
     assert call_kwargs["max_pathway_num"] == 5
 
 
 def test_process_grouped_data_handles_errors(mock_annotator):
     """Test that errors in annotation are handled gracefully."""
-    mock_annotator.annotate.side_effect = Exception("Test error")
+    mock_annotator.annotate_detailed.side_effect = Exception("Test error")
 
     df = pd.DataFrame({
         "cluster": ["A", "A"],
@@ -84,7 +90,8 @@ def test_process_grouped_data_handles_errors(mock_annotator):
     result = processor.process_grouped_data(df, "cluster")
 
     assert "annotation" in result.columns
-    assert "Failed" in result["annotation"].iloc[0]
+    # When error occurs, annotation is empty string
+    assert result["annotation"].iloc[0] == ""
 
 
 def test_process_single_geneset(mock_annotator):
@@ -97,14 +104,13 @@ def test_process_single_geneset(mock_annotator):
     result = processor.process_single_geneset(df)
 
     assert "annotation" in result.columns
-    assert mock_annotator.annotate.call_count == 1
-    assert len(result) == 3
-    # All rows should have same annotation
-    assert result["annotation"].nunique() == 1
+    assert mock_annotator.annotate_detailed.call_count == 1
+    assert len(result) == 1  # Returns summary row, not per-gene rows
+    assert result["annotation"].iloc[0] == "Process: Test annotation"
 
 
 def test_process_single_geneset_with_kwargs(mock_annotator):
-    """Test that kwargs are passed to annotate."""
+    """Test that kwargs are passed to annotate_detailed."""
     df = pd.DataFrame({
         "gene": ["TP53", "MYC"]
     })
@@ -115,13 +121,13 @@ def test_process_single_geneset_with_kwargs(mock_annotator):
         max_gene_num=100
     )
 
-    call_kwargs = mock_annotator.annotate.call_args[1]
+    call_kwargs = mock_annotator.annotate_detailed.call_args[1]
     assert call_kwargs["max_gene_num"] == 100
 
 
 def test_process_single_geneset_handles_errors(mock_annotator):
     """Test error handling in single gene set processing."""
-    mock_annotator.annotate.side_effect = Exception("Test error")
+    mock_annotator.annotate_detailed.side_effect = Exception("Test error")
 
     df = pd.DataFrame({
         "gene": ["TP53"]
@@ -131,7 +137,8 @@ def test_process_single_geneset_handles_errors(mock_annotator):
     result = processor.process_single_geneset(df)
 
     assert "annotation" in result.columns
-    assert "Failed" in result["annotation"].iloc[0]
+    # When error occurs, annotation is empty string
+    assert result["annotation"].iloc[0] == ""
 
 
 def test_process_single_file_grouped(mock_annotator, tmp_path):
@@ -152,7 +159,7 @@ def test_process_single_file_grouped(mock_annotator, tmp_path):
     assert output_file.exists()
     result = pd.read_csv(output_file)
     assert "annotation" in result.columns
-    assert mock_annotator.annotate.call_count == 2  # 2 clusters
+    assert mock_annotator.annotate_detailed.call_count == 2  # 2 clusters
 
 
 def test_process_single_file_ungrouped(mock_annotator, tmp_path):
@@ -171,4 +178,4 @@ def test_process_single_file_ungrouped(mock_annotator, tmp_path):
     assert output_file.exists()
     result = pd.read_csv(output_file)
     assert "annotation" in result.columns
-    assert mock_annotator.annotate.call_count == 1
+    assert mock_annotator.annotate_detailed.call_count == 1
