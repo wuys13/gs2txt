@@ -1,0 +1,6 @@
+Term,Adjusted P-value,Genes,Combined Score
+T cell activation,0.0001,"CD4,CD8A,CD3E,LCK",387.2
+Immune response,0.0003,"IL2,IFNG,TNF,IL6",298.5
+Cytokine signaling,0.001,"IL2,IL2RA,JAK1,STAT5A",234.1
+Lymphocyte differentiation,0.003,"CD4,CD8A,RUNX3,GATA3",189.4
+Antigen processing and presentation,0.007,"HLA-A,HLA-B,TAP1,B2M",145.6

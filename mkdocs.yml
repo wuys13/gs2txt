@@ -1,0 +1,92 @@
+site_name: gs2txt Documentation
+site_description: LLM-powered biological process annotation for gene sets
+site_author: Yushuai Wu
+site_url: https://wuys13.github.io/gs2txt/
+
+repo_name: wuys13/gs2txt
+repo_url: https://github.com/wuys13/gs2txt
+
+copyright: Copyright &copy; 2025 Yushuai Wu
+
+theme:
+  name: material
+  language: en
+  features:
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - content.code.copy
+    - content.code.annotate
+    - search.suggest
+    - search.highlight
+  palette:
+    - scheme: default
+      primary: teal
+      accent: teal
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: teal
+      accent: teal
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  icon:
+    repo: fontawesome/brands/github
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            show_source: true
+            show_root_heading: true
+            show_category_heading: true
+            docstring_style: numpy
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets:
+      base_path: ["."]
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - admonition
+  - pymdownx.details
+  - tables
+  - toc:
+      permalink: true
+
+nav:
+  - Home: index.md
+  - Getting Started:
+    - Installation: getting-started/installation.md
+    - Quick Start: getting-started/quickstart.md
+    - Configuration: getting-started/configuration.md
+  - Usage Scenarios:
+    - Overview: scenarios/index.md
+    - Batch CSV Processing: scenarios/scenario1.md
+    - Python API: scenarios/scenario2.md
+    - Two-Stage Pipeline: scenarios/scenario3.md
+  - API Reference:
+    - GeneSetAnnotator: api/annotator.md
+    - LLM Providers: api/providers.md
+    - Enrichment Methods: api/enrichment.md
+    - Two-Stage Pipeline: api/pipeline.md
+    - Batch Processor: api/batch.md
+  - Advanced:
+    - Custom Providers: advanced/custom-providers.md
+    - Custom Prompts: advanced/custom-prompts.md
+    - Custom Enrichment: advanced/custom-enrichment.md
+  - Changelog: changelog.md
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/wuys13/gs2txt
+  version:
+    provider: mike

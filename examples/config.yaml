@@ -1,0 +1,88 @@
+# gs2txt 两阶段处理配置文件
+# Two-Stage Pipeline Configuration
+
+# ============================================
+# 输入文件配置 (批量处理模式使用)
+# Input File Configuration (for batch processing)
+# ============================================
+input:
+  # DEG文件夹路径：包含多个差异基因CSV文件
+  # 每个文件名将作为基因集名称 (如 sample1.csv -> gs="sample1")
+  deg_dir: "../data/deg/"
+
+  # 通路富集结果文件夹列表：可以指定多个来源
+  # 将在每个文件夹中查找与DEG文件同名的文件
+  # 例如: sample1.csv 会在 GO/sample1.csv, KEGG/sample1.csv 等中查找
+  pathway_dirs:
+    - "../data/GO/"
+    - "../data/KEGG/"
+    - "../data/Reactome/"
+
+# ============================================
+# 差异基因过滤参数
+# Gene Filtering Parameters
+# ============================================
+gene_filter:
+  # P值阈值：保留 pvalue <= threshold 的基因
+  pvalue_threshold: 0.05
+
+  # Log2FoldChange阈值：保留 |log2FC| >= threshold 的基因
+  log2fc_threshold: 1.0
+
+  # P值列名（根据你的数据文件调整）
+  pvalue_column: "pvalue"
+
+  # Log2FC列名（根据你的数据文件调整）
+  # 支持 "logFC" 或 "log2FoldChange"
+  log2fc_column: "logFC"
+
+  # 每个基因集最多保留多少个基因
+  max_gene_num: 60
+
+# ============================================
+# 通路富集过滤参数
+# Pathway Filtering Parameters
+# ============================================
+pathway_filter:
+  # 调整后P值阈值：保留 Adjusted P-value <= threshold 的通路
+  pvalue_threshold: 0.05
+
+  # P值列名（根据你的富集结果文件调整）
+  # GSEApy 默认: "Adjusted P-value"
+  # 其他工具可能: "padj", "FDR", "q-value"
+  pvalue_column: "Adjusted P-value"
+
+  # 通路名称列名
+  # GSEApy 默认: "Term"
+  # 其他工具可能: "Pathway", "Name", "Description"
+  term_column: "Term"
+
+  # 每个基因集最多保留多少个通路
+  max_pathway_num: 10
+
+# ============================================
+# LLM配置
+# LLM Configuration
+# ============================================
+llm:
+  # 提供商: "litellm" (推荐), "openai", "anthropic"
+  provider: "litellm"
+
+  # 模型ID
+  # LiteLLM 示例: "us.anthropic.claude-haiku-4-5-20251001-v1:0"
+  # OpenAI 示例: "gpt-4", "gpt-4-turbo", "gpt-3.5-turbo"
+  # Anthropic 示例: "claude-sonnet-4-20250514", "claude-3-haiku-20240307"
+  model_id: "us.anthropic.claude-haiku-4-5-20251001-v1:0"
+
+  # 温度参数 (0.0 = 确定性输出, 1.0 = 创造性输出)
+  temperature: 0.0
+
+  # API基础URL (LiteLLM专用)
+  base_url: "https://litellm.thesaisai.com/"
+
+  # API密钥从环境变量读取
+  # 运行前设置: export LITELLM_API_KEY=your-api-key
+  api_key_env: "LITELLM_API_KEY"
+
+  # 也可以直接在这里设置API密钥（不推荐，有安全风险）
+  # api_key: "sk-..."

@@ -1,0 +1,5 @@
+Term,Adjusted P-value,Genes
+T cell activation,0.0001,"CD4,CD8A,CD3E,LCK"
+Immune response,0.0003,"IL2,IFNG,TNF"
+Cytokine signaling,0.0008,"IL2,IFNG,JAK1,STAT4"
+Lymphocyte differentiation,0.002,"CD4,CD8A,IL12RB1"

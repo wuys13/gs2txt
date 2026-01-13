@@ -1,0 +1,4 @@
+Term,Adjusted P-value,Genes
+Cell proliferation,0.0001,"MYC,CCND1,EGFR"
+Regulation of cell growth,0.0005,"MTOR,AKT1,PIK3CA"
+Receptor tyrosine kinase signaling,0.001,"EGFR,ERBB2,SRC"

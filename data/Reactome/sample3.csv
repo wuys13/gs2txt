@@ -1,0 +1,4 @@
+Term,Adjusted P-value,Genes
+Signaling by EGFR,0.0002,"EGFR,SRC,ERBB2"
+mTOR signalling,0.0005,"MTOR,AKT1"
+Oncogenic MAPK signaling,0.0009,"KRAS,BRAF,MYC"

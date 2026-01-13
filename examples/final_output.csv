@@ -1,0 +1,120 @@
+gs,annotation,pathways,PPIs,Final_prompt
+sample1,"The perturbed genes collectively function to detect DNA damage, activate cell cycle checkpoints, and coordinate the decision between DNA repair and programmed cell death. TP53 and BRCA1 serve as central hubs that orchestrate these responses through transcriptional regulation and homologous recombination repair. The gene set encompasses the canonical p53-mediated stress response pathway, including checkpoint kinases (ATM, CHEK2), cell cycle inhibitors (CDKN1A, RB1), pro-apoptotic effectors (BAX), and regulatory modulators (MDM2, BCL2, GADD45A).
+
+This perturbation represents a coordinated surveillance system that maintains genomic integrity by integrating DNA damage signals with cell cycle control and apoptotic pathways. Dysregulation of these interconnected mechanisms is a hallmark of cancer development, as loss of checkpoint control and impaired apoptosis enable accumulation of mutations and genomic instability.
+
+This perturbation is primarily involved in p53-mediated DNA damage response and cell cycle checkpoint control, with integrated regulation of apoptosis as a fail-safe mechanism for irreparably damaged cells.","DNA damage response,p53 signaling pathway,DNA Double-Strand Break Repair,Cell cycle checkpoint,Homologous recombination,TP53 Regulates Transcription,Apoptotic process,Cell cycle,Intrinsic Pathway for Apoptosis,Cellular response to stress","PPI Hub genes: TP53, BRCA1. Network density: 0.45","Your task is to infer the most specific and informative biological process that best characterizes this perturbation, based on gene functions and enriched pathways (if provided).
+
+Input information:
+
+[Gene set]
+TP53, BRCA1, CDKN1A, ATM, CHEK2, MDM2, BAX, BCL2, RB1, GADD45A
+
+[Enriched pathways]
+- DNA damage response
+- p53 signaling pathway
+- DNA Double-Strand Break Repair
+- Cell cycle checkpoint
+- Homologous recombination
+- TP53 Regulates Transcription
+- Apoptotic process
+- Cell cycle
+- Intrinsic Pathway for Apoptosis
+- Cellular response to stress
+
+[Additional context]
+PPI Hub genes: TP53, BRCA1. Network density: 0.45
+
+Analyze the perturbation as follows:
+1. Identify major functional themes or modules represented by the genes.
+2. Use the enriched pathways (if provided) to validate or refine these themes.
+3. Abstract these findings into a single dominant biological process.
+
+Output requirements:
+- Write a concise summary describing the biological process this perturbation represents.
+- Focus on the functional meaning and biological interpretation.
+- Do NOT include any labels or prefixes like 'Process:', 'Justification:', 'Summary:', etc.
+- Do NOT list all of the pathway names or gene names in the output. Only list the most several important items if necessary.
+- Just output the descriptive text directly.
+
+Example good output:
+The perturbed genes collectively function to detect DNA lesions, halt cell division, and coordinate repair mechanisms.
+Dysregulation of this pathway is commonly associated with cancer development and genomic instability.
+This perturbation is primarily involved in DNA damage response and cell cycle checkpoint regulation.
+"
+sample2,"T cell activation and differentiation through coordinated TCR signaling and cytokine-mediated immune response. The gene set encompasses core T cell receptor components (CD3E, CD4, CD8A, LCK), key transcriptional regulators of T cell function (STAT4, JAK1), and critical effector cytokines (IL2, IFNG, TNF) that drive T cell proliferation and differentiation into Th1 and cytotoxic phenotypes. The high network density and centrality of CD4 and IL2 as hub genes indicate this represents a tightly integrated signaling module where TCR engagement triggers JAK-STAT pathway activation, leading to IL2 production and autocrine/paracrine amplification of T cell responses. This perturbation fundamentally characterizes adaptive immune activation and T cell-mediated immunity, particularly the transition from naive to effector T cell states.","T cell activation,T cell receptor signaling,Immune response,JAK-STAT signaling pathway,Cytokine signaling,Cytokine-cytokine receptor interaction,Lymphocyte differentiation","PPI Hub genes: CD4, IL2. Network density: 0.52","Your task is to infer the most specific and informative biological process that best characterizes this perturbation, based on gene functions and enriched pathways (if provided).
+
+Input information:
+
+[Gene set]
+CD4, CD8A, IL2, IFNG, TNF, CD3E, LCK, JAK1, STAT4, IL12RB1
+
+[Enriched pathways]
+- T cell activation
+- T cell receptor signaling
+- Immune response
+- JAK-STAT signaling pathway
+- Cytokine signaling
+- Cytokine-cytokine receptor interaction
+- Lymphocyte differentiation
+
+[Additional context]
+PPI Hub genes: CD4, IL2. Network density: 0.52
+
+Analyze the perturbation as follows:
+1. Identify major functional themes or modules represented by the genes.
+2. Use the enriched pathways (if provided) to validate or refine these themes.
+3. Abstract these findings into a single dominant biological process.
+
+Output requirements:
+- Write a concise summary describing the biological process this perturbation represents.
+- Focus on the functional meaning and biological interpretation.
+- Do NOT include any labels or prefixes like 'Process:', 'Justification:', 'Summary:', etc.
+- Do NOT list all of the pathway names or gene names in the output. Only list the most several important items if necessary.
+- Just output the descriptive text directly.
+
+Example good output:
+The perturbed genes collectively function to detect DNA lesions, halt cell division, and coordinate repair mechanisms.
+Dysregulation of this pathway is commonly associated with cancer development and genomic instability.
+This perturbation is primarily involved in DNA damage response and cell cycle checkpoint regulation.
+"
+sample3,"The perturbed genes collectively encode receptor tyrosine kinases (EGFR, ERBB2), their downstream effectors (SRC, AKT1), and key regulators of proliferative signaling (KRAS, BRAF, MYC, CCND1, PIK3CA, MTOR). These components form interconnected signaling networks that converge on two major pathways: the MAPK cascade and the PI3K-AKT-mTOR axis, both of which drive cell proliferation and growth.
+
+The enriched pathways reveal a coordinated program of oncogenic signaling wherein growth factor receptor activation triggers sustained proliferative signals through Ras-MAPK and PI3K-AKT cascades, culminating in increased cell cycle progression (via CCND1) and anabolic metabolism (via mTOR). MYC amplification further reinforces this proliferative state through transcriptional activation of growth-promoting genes.
+
+This perturbation is primarily involved in **sustained oncogenic signaling and hyperproliferation**, characterized by constitutive activation of growth factor receptor pathways and their downstream effectors. The constellation of alterations represents a hallmark of cancer cell transformation, wherein multiple checkpoints controlling cell division and growth are simultaneously dysregulated to drive uncontrolled proliferation.","Cell proliferation,MAPK signaling pathway,Signaling by EGFR,PI3K-AKT signaling pathway,Regulation of cell growth,mTOR signalling,ErbB signaling pathway,Oncogenic MAPK signaling,Receptor tyrosine kinase signaling,Ras signaling pathway",,"Your task is to infer the most specific and informative biological process that best characterizes this perturbation, based on gene functions and enriched pathways (if provided).
+
+Input information:
+
+[Gene set]
+EGFR, MYC, KRAS, BRAF, CCND1, PIK3CA, AKT1, MTOR, ERBB2, SRC
+
+[Enriched pathways]
+- Cell proliferation
+- MAPK signaling pathway
+- Signaling by EGFR
+- PI3K-AKT signaling pathway
+- Regulation of cell growth
+- mTOR signalling
+- ErbB signaling pathway
+- Oncogenic MAPK signaling
+- Receptor tyrosine kinase signaling
+- Ras signaling pathway
+
+Analyze the perturbation as follows:
+1. Identify major functional themes or modules represented by the genes.
+2. Use the enriched pathways (if provided) to validate or refine these themes.
+3. Abstract these findings into a single dominant biological process.
+
+Output requirements:
+- Write a concise summary describing the biological process this perturbation represents.
+- Focus on the functional meaning and biological interpretation.
+- Do NOT include any labels or prefixes like 'Process:', 'Justification:', 'Summary:', etc.
+- Do NOT list all of the pathway names or gene names in the output. Only list the most several important items if necessary.
+- Just output the descriptive text directly.
+
+Example good output:
+The perturbed genes collectively function to detect DNA lesions, halt cell division, and coordinate repair mechanisms.
+Dysregulation of this pathway is commonly associated with cancer development and genomic instability.
+This perturbation is primarily involved in DNA damage response and cell cycle checkpoint regulation.
+"

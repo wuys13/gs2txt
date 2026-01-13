@@ -1,0 +1,4 @@
+Term,Adjusted P-value,Genes
+DNA Double-Strand Break Repair,0.0003,"BRCA1,ATM,CHEK2"
+TP53 Regulates Transcription,0.0009,"TP53,MDM2,CDKN1A"
+Intrinsic Pathway for Apoptosis,0.002,"BAX,BCL2"

@@ -1,0 +1,112 @@
+gs,genes,pathways,ppis,final_prompt
+sample1,"TP53,BRCA1,CDKN1A,ATM,CHEK2,MDM2,BAX,BCL2,RB1,GADD45A","DNA damage response,p53 signaling pathway,DNA Double-Strand Break Repair,Cell cycle checkpoint,Homologous recombination,TP53 Regulates Transcription,Apoptotic process,Cell cycle,Intrinsic Pathway for Apoptosis,Cellular response to stress","PPI Hub genes: TP53, BRCA1. Network density: 0.45","Your task is to infer the most specific and informative biological process that best characterizes this perturbation, based on gene functions and enriched pathways (if provided).
+
+Input information:
+
+[Gene set]
+TP53, BRCA1, CDKN1A, ATM, CHEK2, MDM2, BAX, BCL2, RB1, GADD45A
+
+[Enriched pathways]
+- DNA damage response
+- p53 signaling pathway
+- DNA Double-Strand Break Repair
+- Cell cycle checkpoint
+- Homologous recombination
+- TP53 Regulates Transcription
+- Apoptotic process
+- Cell cycle
+- Intrinsic Pathway for Apoptosis
+- Cellular response to stress
+
+[Additional context]
+PPI Hub genes: TP53, BRCA1. Network density: 0.45
+
+Analyze the perturbation as follows:
+1. Identify major functional themes or modules represented by the genes.
+2. Use the enriched pathways (if provided) to validate or refine these themes.
+3. Abstract these findings into a single dominant biological process.
+
+Output requirements:
+- Write a concise summary describing the biological process this perturbation represents.
+- Focus on the functional meaning and biological interpretation.
+- Do NOT include any labels or prefixes like 'Process:', 'Justification:', 'Summary:', etc.
+- Do NOT list all of the pathway names or gene names in the output. Only list the most several important items if necessary.
+- Just output the descriptive text directly.
+
+Example good output:
+The perturbed genes collectively function to detect DNA lesions, halt cell division, and coordinate repair mechanisms.
+Dysregulation of this pathway is commonly associated with cancer development and genomic instability.
+This perturbation is primarily involved in DNA damage response and cell cycle checkpoint regulation.
+"
+sample2,"CD4,CD8A,IL2,IFNG,TNF,CD3E,LCK,JAK1,STAT4,IL12RB1","T cell activation,T cell receptor signaling,Immune response,JAK-STAT signaling pathway,Cytokine signaling,Cytokine-cytokine receptor interaction,Lymphocyte differentiation","PPI Hub genes: CD4, IL2. Network density: 0.52","Your task is to infer the most specific and informative biological process that best characterizes this perturbation, based on gene functions and enriched pathways (if provided).
+
+Input information:
+
+[Gene set]
+CD4, CD8A, IL2, IFNG, TNF, CD3E, LCK, JAK1, STAT4, IL12RB1
+
+[Enriched pathways]
+- T cell activation
+- T cell receptor signaling
+- Immune response
+- JAK-STAT signaling pathway
+- Cytokine signaling
+- Cytokine-cytokine receptor interaction
+- Lymphocyte differentiation
+
+[Additional context]
+PPI Hub genes: CD4, IL2. Network density: 0.52
+
+Analyze the perturbation as follows:
+1. Identify major functional themes or modules represented by the genes.
+2. Use the enriched pathways (if provided) to validate or refine these themes.
+3. Abstract these findings into a single dominant biological process.
+
+Output requirements:
+- Write a concise summary describing the biological process this perturbation represents.
+- Focus on the functional meaning and biological interpretation.
+- Do NOT include any labels or prefixes like 'Process:', 'Justification:', 'Summary:', etc.
+- Do NOT list all of the pathway names or gene names in the output. Only list the most several important items if necessary.
+- Just output the descriptive text directly.
+
+Example good output:
+The perturbed genes collectively function to detect DNA lesions, halt cell division, and coordinate repair mechanisms.
+Dysregulation of this pathway is commonly associated with cancer development and genomic instability.
+This perturbation is primarily involved in DNA damage response and cell cycle checkpoint regulation.
+"
+sample3,"EGFR,MYC,KRAS,BRAF,CCND1,PIK3CA,AKT1,MTOR,ERBB2,SRC","Cell proliferation,MAPK signaling pathway,Signaling by EGFR,PI3K-AKT signaling pathway,Regulation of cell growth,mTOR signalling,ErbB signaling pathway,Oncogenic MAPK signaling,Receptor tyrosine kinase signaling,Ras signaling pathway",,"Your task is to infer the most specific and informative biological process that best characterizes this perturbation, based on gene functions and enriched pathways (if provided).
+
+Input information:
+
+[Gene set]
+EGFR, MYC, KRAS, BRAF, CCND1, PIK3CA, AKT1, MTOR, ERBB2, SRC
+
+[Enriched pathways]
+- Cell proliferation
+- MAPK signaling pathway
+- Signaling by EGFR
+- PI3K-AKT signaling pathway
+- Regulation of cell growth
+- mTOR signalling
+- ErbB signaling pathway
+- Oncogenic MAPK signaling
+- Receptor tyrosine kinase signaling
+- Ras signaling pathway
+
+Analyze the perturbation as follows:
+1. Identify major functional themes or modules represented by the genes.
+2. Use the enriched pathways (if provided) to validate or refine these themes.
+3. Abstract these findings into a single dominant biological process.
+
+Output requirements:
+- Write a concise summary describing the biological process this perturbation represents.
+- Focus on the functional meaning and biological interpretation.
+- Do NOT include any labels or prefixes like 'Process:', 'Justification:', 'Summary:', etc.
+- Do NOT list all of the pathway names or gene names in the output. Only list the most several important items if necessary.
+- Just output the descriptive text directly.
+
+Example good output:
+The perturbed genes collectively function to detect DNA lesions, halt cell division, and coordinate repair mechanisms.
+Dysregulation of this pathway is commonly associated with cancer development and genomic instability.
+This perturbation is primarily involved in DNA damage response and cell cycle checkpoint regulation.
+"

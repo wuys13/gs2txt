@@ -1,0 +1,6 @@
+Term,Adjusted P-value,Genes,Combined Score
+RTK-RAS signaling,0.0002,"EGFR,KRAS,BRAF,RAF1",356.8
+MAPK signaling pathway,0.0008,"EGFR,KRAS,MAP2K1,ERK2",267.3
+PI3K-AKT signaling,0.002,"PIK3CA,AKT1,PTEN,MTOR",198.7
+Cell proliferation,0.004,"MYC,CCND1,CDK4,E2F1",167.4
+Receptor tyrosine kinase signaling,0.009,"EGFR,ERBB2,MET,FGFR1",112.5

@@ -1,0 +1,4 @@
+Term,Adjusted P-value,Genes
+T cell receptor signaling,0.0002,"CD4,CD8A,CD3E,LCK"
+JAK-STAT signaling pathway,0.0006,"IL2,IFNG,JAK1,STAT4"
+Cytokine-cytokine receptor interaction,0.001,"IL2,IFNG,TNF,IL12RB1"

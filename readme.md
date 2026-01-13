@@ -166,6 +166,158 @@ The output CSV will contain all original columns plus an `annotation` column wit
 
 ---
 
+## 📋 Usage Scenarios (使用场景)
+
+gs2txt 提供三种使用场景，适应不同需求：
+
+### Scenario 1: Batch CSV Processing (批量处理 CSV)
+
+**适用场景**：处理单个或多个 CSV 文件，自动输出结果到新 CSV
+
+```bash
+cd examples
+export LITELLM_API_KEY=your-api-key
+python scenario1_batch_csv.py
+```
+
+**示例脚本**：[`examples/scenario1_batch_csv.py`](examples/scenario1_batch_csv.py)
+
+**特点**：
+- 使用 `BatchProcessor` 一键处理
+- 支持单文件和多 cluster 分组处理
+- 自动输出 CSV：`gs, annotation` 格式
+
+```python
+from gs2txt import GeneSetAnnotator
+from gs2txt.llm import LiteLLMProvider
+from gs2txt.batch import BatchProcessor
+
+provider = LiteLLMProvider(api_key="...", model_id="gpt-4")
+annotator = GeneSetAnnotator(llm_provider=provider)
+processor = BatchProcessor(annotator)
+
+# 处理单个文件
+processor.process_single_file(
+    input_path="genes.csv",
+    output_path="output.csv",
+    group_column="cluster",  # 可选：按 cluster 分组
+    max_gene_num=60,
+    pvalue_threshold=0.05
+)
+```
+
+---
+
+### Scenario 2: Python API (代码集成)
+
+**适用场景**：在代码中集成 gs2txt，获取文本结果进行进一步处理
+
+```bash
+cd examples
+export LITELLM_API_KEY=your-api-key
+python scenario2_api.py
+```
+
+**示例脚本**：[`examples/scenario2_api.py`](examples/scenario2_api.py)
+
+**特点**：
+- `annotate()` 返回字符串，灵活处理
+- 支持预计算通路、额外上下文
+- 可自定义过滤参数
+
+```python
+from gs2txt import GeneSetAnnotator
+from gs2txt.llm import LiteLLMProvider
+
+provider = LiteLLMProvider(api_key="...", model_id="gpt-4")
+annotator = GeneSetAnnotator(llm_provider=provider)
+
+# 直接获取注释文本
+result = annotator.annotate(
+    deg_df,
+    max_gene_num=60,
+    pvalue_threshold=0.05,
+    additional_context="PPI Hub genes: TP53, MYC"  # 可选
+)
+print(result)  # 字符串：生物学过程描述
+```
+
+---
+
+### Scenario 3: Two-Stage Pipeline (两阶段处理) ⭐推荐
+
+**适用场景**：大规模数据处理，需要检查中间结果，分离数据预处理和 API 调用
+
+```bash
+cd examples
+
+# 阶段一：预处理（无需 API）
+python scenario3_two_stage.py batch
+
+# 检查中间结果
+python scenario3_two_stage.py check
+
+# 阶段二：注释（需要 API）
+export LITELLM_API_KEY=your-api-key
+python scenario3_two_stage.py annotate
+```
+
+**示例脚本**：[`examples/scenario3_two_stage.py`](examples/scenario3_two_stage.py)
+
+**特点**：
+- **阶段一**：读取 DEG + 通路文件，过滤，保存中间结果（无需 API）
+- **阶段二**：读取中间结果，调用 LLM，生成最终注释（需要 API）
+- 支持多个 DEG 文件夹和多个通路来源（GO, KEGG, Reactome）
+- YAML 配置文件控制所有参数
+
+**配置文件** (`config.yaml`)：
+```yaml
+input:
+  deg_dir: "../data/deg/"           # DEG 文件夹
+  pathway_dirs:                      # 多个通路文件夹
+    - "../data/GO/"
+    - "../data/KEGG/"
+    - "../data/Reactome/"
+
+gene_filter:
+  pvalue_threshold: 0.05
+  log2fc_threshold: 1.0
+  max_gene_num: 60
+
+pathway_filter:
+  pvalue_threshold: 0.05
+  max_pathway_num: 10
+
+llm:
+  provider: "litellm"
+  model_id: "gpt-4"
+  api_key_env: "LITELLM_API_KEY"
+```
+
+**代码调用**：
+```python
+from gs2txt.pipeline import TwoStagePipeline
+
+# 阶段一：批量预处理
+TwoStagePipeline.preprocess_batch(
+    config_file="config.yaml",
+    output_file="intermediate.csv"
+)
+
+# 阶段二：LLM 注释
+TwoStagePipeline.annotate(
+    intermediate_file="intermediate.csv",
+    output_file="final_output.csv",
+    config_file="config.yaml"
+)
+```
+
+**输出格式**：
+- 中间结果：`gs, genes, pathways, ppis, final_prompt`
+- 最终结果：`gs, annotation, pathways, PPIs, Final_prompt`
+
+---
+
 ## 📖 Usage Examples
 
 ### Example 1: Use Anthropic Claude
@@ -343,10 +495,12 @@ pytest --cov=gs2txt --cov-report=html
 
 ## 📚 Documentation
 
-- [Quick Start Guide](docs/quickstart.md)
-- [API Reference](docs/api_reference.md)
-- [Advanced Usage](docs/advanced_usage.md)
-- [Custom Providers](docs/custom_providers.md)
+Full documentation is available at: **https://wuys13.github.io/gs2txt/**
+
+- [Getting Started](https://wuys13.github.io/gs2txt/getting-started/quickstart/)
+- [Usage Scenarios](https://wuys13.github.io/gs2txt/scenarios/scenario1/)
+- [API Reference](https://wuys13.github.io/gs2txt/api/annotator/)
+- [Changelog](https://wuys13.github.io/gs2txt/changelog/)
 
 ---
 

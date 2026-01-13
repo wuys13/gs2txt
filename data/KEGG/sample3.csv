@@ -1,0 +1,5 @@
+Term,Adjusted P-value,Genes
+MAPK signaling pathway,0.0001,"EGFR,KRAS,BRAF"
+PI3K-AKT signaling pathway,0.0003,"PIK3CA,AKT1,MTOR"
+ErbB signaling pathway,0.0007,"EGFR,ERBB2,SRC"
+Ras signaling pathway,0.001,"KRAS,BRAF,SRC"

@@ -1,0 +1,6 @@
+Term,Adjusted P-value,Genes,Combined Score
+DNA damage response,0.001,"TP53,BRCA1,ATM,CHEK2",245.6
+Cell cycle checkpoint,0.002,"CDKN1A,TP53,CHEK1,CDC25A",198.3
+Apoptosis,0.005,"BAX,BCL2,CASP3,TP53",156.7
+p53 signaling pathway,0.008,"TP53,MDM2,CDKN1A,BAX",134.2
+Homologous recombination,0.012,"BRCA1,BRCA2,RAD51,PALB2",98.5
