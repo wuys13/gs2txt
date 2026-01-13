@@ -2,7 +2,7 @@
 gs2txt: LLM-powered biological process annotation for gene sets.
 """
 
-__version__ = "0.1.0"
+__version__ = "0.1.2"
 
 from .core import GeneSetAnnotator, annotate_gene_set_with_llm
 from .enrichment import create_enrichment
