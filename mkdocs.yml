@@ -79,6 +79,7 @@ nav:
     - Two-Stage Pipeline: api/pipeline.md
     - Batch Processor: api/batch.md
   - Advanced:
+    - Overview: advanced/index.md
     - Custom Providers: advanced/custom-providers.md
     - Custom Prompts: advanced/custom-prompts.md
     - Custom Enrichment: advanced/custom-enrichment.md
