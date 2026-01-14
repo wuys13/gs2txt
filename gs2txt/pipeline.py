@@ -155,7 +155,7 @@ class TwoStagePipeline:
         enrichment_dir: str,
         output_file: str,
         config_file: Optional[str] = None,
-        group_column: str = "cluster",
+        group_column: Optional[str] = "cluster",
         ppi_context: Optional[dict[str, str]] = None,
     ) -> pd.DataFrame:
         """
@@ -179,8 +179,10 @@ class TwoStagePipeline:
             Path to save intermediate results CSV.
         config_file : str, optional
             Path to YAML config file. If None, uses default config.
-        group_column : str
-            Column name for grouping gene sets (default: "cluster")
+        group_column : str, optional
+            Column name for grouping gene sets (default: "cluster").
+            If None, treat the entire file as a single gene set,
+            using the filename (without extension) as the gs name.
         ppi_context : dict, optional
             Dictionary mapping cluster names to PPI context strings.
             Example: {"cluster_1": "Hub genes: TP53, MYC"}
@@ -193,12 +195,21 @@ class TwoStagePipeline:
 
         Examples
         --------
+        >>> # With group column
         >>> TwoStagePipeline.preprocess(
         ...     deg_file="deg.csv",
         ...     enrichment_dir="enrichment/",
         ...     output_file="intermediate.csv",
         ...     config_file="config.yaml",
         ...     group_column="cluster"
+        ... )
+
+        >>> # Without group column (single gene set)
+        >>> TwoStagePipeline.preprocess(
+        ...     deg_file="my_genes.csv",
+        ...     enrichment_dir="enrichment/",
+        ...     output_file="intermediate.csv",
+        ...     group_column=None  # Uses "my_genes" as gs name
         ... )
         """
         # Load config
@@ -214,12 +225,21 @@ class TwoStagePipeline:
         if "gene" not in deg_df.columns:
             raise ValueError("DEG file must contain a 'gene' column")
 
-        if group_column not in deg_df.columns:
-            raise ValueError(f"DEG file must contain '{group_column}' column")
-
-        # Get unique clusters
-        clusters = deg_df[group_column].unique()
-        print(f"Found {len(clusters)} clusters: {list(clusters)}")
+        # Handle group_column=None case
+        if group_column is None:
+            # Treat entire file as single gene set, use filename as gs name
+            gs_name = Path(deg_file).stem
+            clusters = [gs_name]
+            # Add a temporary column for unified processing
+            deg_df["_gs_temp_"] = gs_name
+            group_column = "_gs_temp_"
+            print(f"No group column specified, treating as single gene set: {gs_name}")
+        else:
+            if group_column not in deg_df.columns:
+                raise ValueError(f"DEG file must contain '{group_column}' column")
+            # Get unique clusters
+            clusters = deg_df[group_column].unique()
+            print(f"Found {len(clusters)} clusters: {list(clusters)}")
 
         # Prepare enrichment directory
         enrichment_path = Path(enrichment_dir)
@@ -306,6 +326,8 @@ class TwoStagePipeline:
         intermediate_file: str,
         output_file: str,
         config_file: Optional[str] = None,
+        test: bool = False,
+        checkpoint_interval: int = 100,
     ) -> pd.DataFrame:
         """
         Stage 2: Generate annotations using LLM.
@@ -321,6 +343,12 @@ class TwoStagePipeline:
             Path to save final results CSV.
         config_file : str, optional
             Path to YAML config file. If None, uses default config.
+        test : bool
+            If True, only process the first 3 rows (for testing).
+            Default: False
+        checkpoint_interval : int
+            Save intermediate results every N records to prevent data loss.
+            Default: 100. Set to 0 to disable checkpointing.
 
         Returns
         -------
@@ -330,10 +358,25 @@ class TwoStagePipeline:
 
         Examples
         --------
+        >>> # Normal annotation
         >>> TwoStagePipeline.annotate(
         ...     intermediate_file="intermediate.csv",
         ...     output_file="output.csv",
         ...     config_file="config.yaml"
+        ... )
+
+        >>> # Test mode: only process first 3 rows
+        >>> TwoStagePipeline.annotate(
+        ...     intermediate_file="intermediate.csv",
+        ...     output_file="output.csv",
+        ...     test=True
+        ... )
+
+        >>> # Custom checkpoint interval
+        >>> TwoStagePipeline.annotate(
+        ...     intermediate_file="intermediate.csv",
+        ...     output_file="output.csv",
+        ...     checkpoint_interval=50  # Save every 50 records
         ... )
         """
         # Load config
@@ -349,13 +392,21 @@ class TwoStagePipeline:
         print(f"Reading intermediate file: {intermediate_file}")
         inter_df = pd.read_csv(intermediate_file)
 
+        # Test mode: only process first 3 rows
+        if test:
+            inter_df = inter_df.head(3)
+            print("Test mode: processing only first 3 rows")
+
         # Get system prompt
         prompt_builder = PromptBuilder()
         system_prompt = prompt_builder.system_template
 
+        # Checkpoint file path
+        checkpoint_file = output_file + ".checkpoint" if checkpoint_interval > 0 else None
+
         # Process each row
         results = []
-        for _, row in tqdm(inter_df.iterrows(), total=len(inter_df), desc="Generating annotations"):
+        for idx, (_, row) in enumerate(tqdm(inter_df.iterrows(), total=len(inter_df), desc="Generating annotations")):
             gs = row["gs"]
             row.get("genes", "")
             pathways = row.get("pathways", "")
@@ -393,10 +444,24 @@ class TwoStagePipeline:
                 "Final_prompt": final_prompt
             })
 
-        # Create DataFrame and save
+            # Checkpoint: save intermediate results periodically
+            if checkpoint_file and checkpoint_interval > 0:
+                if (idx + 1) % checkpoint_interval == 0:
+                    checkpoint_df = pd.DataFrame(results)
+                    checkpoint_df.to_csv(checkpoint_file, index=False)
+                    print(f"Checkpoint saved at {len(results)} records: {checkpoint_file}")
+
+        # Create DataFrame and save final results
         result_df = pd.DataFrame(results)
         result_df.to_csv(output_file, index=False)
         print(f"Final results saved to: {output_file}")
+
+        # Remove checkpoint file if exists (processing completed successfully)
+        if checkpoint_file:
+            checkpoint_path = Path(checkpoint_file)
+            if checkpoint_path.exists():
+                checkpoint_path.unlink()
+                print("Checkpoint file removed (processing complete)")
 
         return result_df
 
@@ -405,6 +470,8 @@ class TwoStagePipeline:
         config_file: str,
         output_file: str = "intermediate.csv",
         ppi_context: Optional[dict[str, str]] = None,
+        test: bool = False,
+        checkpoint_interval: int = 100,
     ) -> pd.DataFrame:
         """
         Batch preprocess: Scan DEG folder, find matching pathway files in multiple folders.
@@ -423,6 +490,12 @@ class TwoStagePipeline:
             Path to save intermediate results CSV
         ppi_context : dict, optional
             Dictionary mapping gene set names to PPI context strings
+        test : bool
+            If True, only process the first 3 DEG files (for testing).
+            Default: False
+        checkpoint_interval : int
+            Save intermediate results every N records to prevent data loss.
+            Default: 100. Set to 0 to disable checkpointing.
 
         Returns
         -------
@@ -432,9 +505,24 @@ class TwoStagePipeline:
 
         Examples
         --------
+        >>> # Normal batch processing
         >>> TwoStagePipeline.preprocess_batch(
         ...     config_file="config.yaml",
         ...     output_file="intermediate.csv"
+        ... )
+
+        >>> # Test mode: only process first 3 files
+        >>> TwoStagePipeline.preprocess_batch(
+        ...     config_file="config.yaml",
+        ...     output_file="intermediate.csv",
+        ...     test=True
+        ... )
+
+        >>> # Custom checkpoint interval
+        >>> TwoStagePipeline.preprocess_batch(
+        ...     config_file="config.yaml",
+        ...     output_file="intermediate.csv",
+        ...     checkpoint_interval=50  # Save every 50 records
         ... )
         """
         # Load config
@@ -452,15 +540,23 @@ class TwoStagePipeline:
         if not deg_files:
             raise ValueError(f"No CSV files found in DEG directory: {config.deg_dir}")
 
+        # Test mode: only process first 3 files
+        if test:
+            deg_files = deg_files[:3]
+            print(f"Test mode: processing only first 3 files")
+
         print(f"Found {len(deg_files)} DEG files in {config.deg_dir}")
         print(f"Pathway directories: {config.pathway_dirs}")
 
         # Initialize prompt builder
         prompt_builder = PromptBuilder()
 
+        # Checkpoint file path
+        checkpoint_file = output_file + ".checkpoint" if checkpoint_interval > 0 else None
+
         # Process each DEG file
         results = []
-        for deg_file in tqdm(deg_files, desc="Processing DEG files"):
+        for idx, deg_file in enumerate(tqdm(deg_files, desc="Processing DEG files")):
             gs_name = deg_file.stem  # filename without extension
 
             # Read and filter genes
@@ -565,11 +661,25 @@ class TwoStagePipeline:
                 "final_prompt": final_prompt
             })
 
-        # Create DataFrame and save
+            # Checkpoint: save intermediate results periodically
+            if checkpoint_file and checkpoint_interval > 0:
+                if (idx + 1) % checkpoint_interval == 0:
+                    checkpoint_df = pd.DataFrame(results)
+                    checkpoint_df.to_csv(checkpoint_file, index=False)
+                    print(f"Checkpoint saved at {len(results)} records: {checkpoint_file}")
+
+        # Create DataFrame and save final results
         result_df = pd.DataFrame(results)
         result_df.to_csv(output_file, index=False)
         print(f"Intermediate results saved to: {output_file}")
         print(f"Processed {len(results)} gene sets")
+
+        # Remove checkpoint file if exists (processing completed successfully)
+        if checkpoint_file:
+            checkpoint_path = Path(checkpoint_file)
+            if checkpoint_path.exists():
+                checkpoint_path.unlink()
+                print(f"Checkpoint file removed (processing complete)")
 
         return result_df
 
