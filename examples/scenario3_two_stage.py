@@ -4,27 +4,18 @@ Scenario 3: Two-Stage Processing Pipeline
 
 运行方式 / Usage:
 
-模式A - 单文件处理 (Single File Mode):
-    python scenario3_two_stage.py preprocess      # 预处理单个DEG文件
-    python scenario3_two_stage.py annotate        # 注释
-
-模式B - 批量处理 (Batch Mode) [推荐]:
-    python scenario3_two_stage.py batch           # 批量预处理多个DEG文件
-    python scenario3_two_stage.py annotate        # 注释
+    python scenario3_two_stage.py batch           # 预处理多个DEG文件（无需API）
+    python scenario3_two_stage.py check           # 检查中间结果
+    python scenario3_two_stage.py annotate        # 注释（需要API）
 
 一次性运行:
     export LITELLM_API_KEY=your-api-key
-    python scenario3_two_stage.py all             # 单文件模式全流程
-    python scenario3_two_stage.py batch-all       # 批量模式全流程
+    python scenario3_two_stage.py batch-all       # 完整流程（预处理+注释）
 
 说明 / Description:
     这个脚本展示如何使用两阶段处理模式：
 
-    模式A - 单文件处理:
-    - 输入: 单个DEG文件（含cluster列）+ 单个富集目录
-    - 适合: 一个DEG文件包含多个cluster的情况
-
-    模式B - 批量处理 [推荐]:
+    批量处理模式:
     - 输入: DEG文件夹（多个CSV）+ 多个通路文件夹（GO/, KEGG/, Reactome/）
     - 文件匹配: DEG文件名 = 通路文件名 (sample1.csv 匹配各文件夹中的 sample1.csv)
     - 通路合并: 从多个来源合并通路，去重，按P值排序取前N个
@@ -37,11 +28,6 @@ Scenario 3: Two-Stage Processing Pipeline
     - 支持多个通路来源（GO, KEGG, Reactome等）合并
 
 输入文件格式:
-    模式A:
-    - DEG文件: CSV, 必须有 gene, cluster 列, 可选 pvalue, logFC 列
-    - 富集文件: 每个cluster一个CSV, 文件名为 {cluster}.csv
-
-    模式B (批量):
     - DEG文件夹: 多个CSV文件，每个文件代表一个基因集
     - 通路文件夹: 多个文件夹，每个包含与DEG同名的CSV文件
     - 配置文件: YAML格式，指定 deg_dir 和 pathway_dirs
@@ -61,52 +47,11 @@ from gs2txt.pipeline import TwoStagePipeline
 
 
 # ==============================================
-# 阶段一：预处理
-# ==============================================
-def run_preprocess():
-    """
-    阶段一：预处理差异基因和富集数据
-
-    输入:
-    - ../data/sample_deg.csv: 差异基因文件
-    - ../data/enrichment/: 富集结果目录
-    - config.yaml: 配置文件
-
-    输出:
-    - intermediate.csv: 中间结果文件
-    """
-    print("\n" + "=" * 60)
-    print("阶段一：预处理 (无需API)")
-    print("Stage 1: Preprocess (No API Required)")
-    print("=" * 60)
-
-    # 可选：添加PPI上下文信息
-    ppi_context = {
-        "cluster_1": "PPI Hub genes: TP53, BRCA1. Network density: 0.45",
-        "cluster_2": "PPI Hub genes: CD4, IL2. Network density: 0.52",
-        # cluster_3 没有PPI信息，将使用空值
-    }
-
-    # 运行预处理
-    TwoStagePipeline.preprocess(
-        deg_file="../data/sample_deg.csv",
-        enrichment_dir="../data/enrichment/",
-        output_file="intermediate.csv",
-        config_file="config.yaml",
-        group_column="cluster",
-        ppi_context=ppi_context  # 可选
-    )
-
-    print("\n预处理完成！请检查 intermediate.csv")
-    print("Preprocess complete! Check intermediate.csv")
-
-
-# ==============================================
-# 阶段一B：批量预处理
+# 阶段一：批量预处理
 # ==============================================
 def run_preprocess_batch(test: bool = False, checkpoint_interval: int = 100):
     """
-    阶段一B：批量预处理多个DEG文件
+    阶段一：批量预处理多个DEG文件
 
     从配置文件读取：
     - deg_dir: DEG文件夹路径
@@ -128,8 +73,8 @@ def run_preprocess_batch(test: bool = False, checkpoint_interval: int = 100):
         每N条保存一次检查点，默认100
     """
     print("\n" + "=" * 60)
-    print("阶段一B：批量预处理 (无需API)")
-    print("Stage 1B: Batch Preprocess (No API Required)")
+    print("阶段一：批量预处理 (无需API)")
+    print("Stage 1: Batch Preprocess (No API Required)")
     print("=" * 60)
 
     # 可选：添加PPI上下文信息
@@ -140,7 +85,7 @@ def run_preprocess_batch(test: bool = False, checkpoint_interval: int = 100):
     }
 
     # 运行批量预处理
-    TwoStagePipeline.preprocess_batch(
+    TwoStagePipeline.preprocess(
         config_file="config.yaml",
         output_file="intermediate.csv",
         ppi_context=ppi_context,  # 可选
@@ -189,29 +134,6 @@ def run_annotate(test: bool = False, checkpoint_interval: int = 100):
 
     print("\n注释完成！查看 final_output.csv")
     print("Annotation complete! Check final_output.csv")
-
-
-# ==============================================
-# 示例：自定义配置
-# ==============================================
-def example_custom_config():
-    """
-    示例：使用自定义配置（不依赖配置文件）
-    """
-    print("\n" + "=" * 60)
-    print("示例：使用默认配置（无配置文件）")
-    print("=" * 60)
-
-    # 阶段一：使用默认配置
-    TwoStagePipeline.preprocess(
-        deg_file="../data/sample_deg.csv",
-        enrichment_dir="../data/enrichment/",
-        output_file="intermediate_default.csv",
-        config_file=None,  # 使用默认配置
-        group_column="cluster"
-    )
-
-    print("预处理完成（使用默认配置）")
 
 
 # ==============================================
@@ -340,22 +262,15 @@ def main():
             except ValueError:
                 pass
 
-    if command == "preprocess":
-        run_preprocess()
-    elif command == "batch":
+    if command == "batch":
         run_preprocess_batch(test=test_mode, checkpoint_interval=checkpoint)
     elif command == "annotate":
-        run_annotate(test=test_mode, checkpoint_interval=checkpoint)
-    elif command == "all":
-        run_preprocess()
         run_annotate(test=test_mode, checkpoint_interval=checkpoint)
     elif command == "batch-all":
         run_preprocess_batch(test=test_mode, checkpoint_interval=checkpoint)
         run_annotate(test=test_mode, checkpoint_interval=checkpoint)
     elif command == "check":
         example_check_intermediate()
-    elif command == "default":
-        example_custom_config()
     else:
         print(f"未知命令: {command}")
         print_usage()
@@ -372,25 +287,16 @@ def print_usage():
     print("  python scenario3_two_stage.py <command> [options]")
 
     print("\n命令 / Commands:")
-    print("  preprocess  - 模式A：预处理单个DEG文件（无需API）")
-    print("  batch       - 模式B：批量预处理多个DEG文件（无需API）[推荐]")
+    print("  batch       - 阶段一：批量预处理多个DEG文件（无需API）")
     print("  annotate    - 阶段二：注释（需要API）")
-    print("  all         - 模式A全流程（预处理+注释）")
-    print("  batch-all   - 模式B全流程（批量预处理+注释）[推荐]")
+    print("  batch-all   - 完整流程（批量预处理+注释）")
     print("  check       - 检查中间结果")
-    print("  default     - 使用默认配置运行预处理")
 
     print("\n可选参数 / Options:")
     print("  --test, -t              测试模式：只处理前3条数据")
     print("  --checkpoint N, -c N    每N条保存检查点（默认100）")
 
-    print("\n模式A示例 - 单文件处理 / Single File Mode:")
-    print("  python scenario3_two_stage.py preprocess")
-    print("  python scenario3_two_stage.py check")
-    print("  export LITELLM_API_KEY=your-api-key")
-    print("  python scenario3_two_stage.py annotate")
-
-    print("\n模式B示例 - 批量处理 / Batch Mode [推荐]:")
+    print("\n示例 / Examples:")
     print("  python scenario3_two_stage.py batch")
     print("  python scenario3_two_stage.py check")
     print("  export LITELLM_API_KEY=your-api-key")
@@ -402,16 +308,11 @@ def print_usage():
     print("  python scenario3_two_stage.py batch-all -t -c 50")
 
     print("\n输入文件 / Input Files:")
-    print("  模式A:")
-    print("    - ../data/sample_deg.csv           差异基因文件")
-    print("    - ../data/enrichment/*.csv         富集结果目录")
-    print("  模式B:")
-    print("    - ../data/deg/*.csv                DEG文件夹")
-    print("    - ../data/GO/*.csv                 GO通路文件夹")
-    print("    - ../data/KEGG/*.csv               KEGG通路文件夹")
-    print("    - ../data/Reactome/*.csv           Reactome通路文件夹")
-    print("  配置文件:")
-    print("    - config.yaml                      配置文件")
+    print("  - ../data/deg/*.csv                DEG文件夹")
+    print("  - ../data/GO/*.csv                 GO通路文件夹")
+    print("  - ../data/KEGG/*.csv               KEGG通路文件夹")
+    print("  - ../data/Reactome/*.csv           Reactome通路文件夹")
+    print("  - config.yaml                      配置文件")
 
     print("\n输出文件 / Output Files:")
     print("  - intermediate.csv                 中间结果")
@@ -420,7 +321,7 @@ def print_usage():
 
     print("\n配置文件说明 / Config File:")
     print("  查看 config.yaml 了解所有可配置参数")
-    print("  批量模式需要配置 input.deg_dir 和 input.pathway_dirs")
+    print("  需要配置 input.deg_dir 和 input.pathway_dirs")
 
 
 if __name__ == "__main__":
