@@ -87,11 +87,14 @@ def config_with_relative_paths(tmp_path):
             "deg_dir": "deg/",
             "pathway_dirs": ["GO/", "KEGG/"]
         },
-        "filtering": {
-            "gene_pvalue_threshold": 0.05,
-            "gene_log2fc_threshold": 1.0,
-            "pathway_pvalue_threshold": 0.05,
-            "max_gene_num": 60,
+        "gene_filter": {
+            "gene_column": "gene",
+            "pvalue_threshold": 0.05,
+            "log2fc_threshold": 1.0,
+            "max_gene_num": 60
+        },
+        "pathway_filter": {
+            "pvalue_threshold": 0.05,
             "max_pathway_num": 10
         },
         "llm": {
@@ -117,11 +120,14 @@ def config_with_absolute_paths(tmp_path, test_data_dir):
                 str(test_data_dir / "KEGG")
             ]
         },
-        "filtering": {
-            "gene_pvalue_threshold": 0.05,
-            "gene_log2fc_threshold": 1.0,
-            "pathway_pvalue_threshold": 0.05,
-            "max_gene_num": 60,
+        "gene_filter": {
+            "gene_column": "gene",
+            "pvalue_threshold": 0.05,
+            "log2fc_threshold": 1.0,
+            "max_gene_num": 60
+        },
+        "pathway_filter": {
+            "pvalue_threshold": 0.05,
             "max_pathway_num": 10
         },
         "llm": {
@@ -303,6 +309,7 @@ def test_filter_genes_basic(sample_deg_data):
     """Test basic gene filtering."""
     genes = TwoStagePipeline._filter_genes(
         sample_deg_data,
+        gene_column="gene",
         pvalue_threshold=0.05,
         log2fc_threshold=1.0
     )
@@ -316,6 +323,7 @@ def test_filter_genes_respects_max(sample_deg_data):
     """Test that max_gene_num is respected."""
     genes = TwoStagePipeline._filter_genes(
         sample_deg_data,
+        gene_column="gene",
         pvalue_threshold=0.05,
         log2fc_threshold=0.0,  # Accept all genes
         max_gene_num=2
@@ -328,6 +336,7 @@ def test_filter_genes_sorts_by_pvalue(sample_deg_data):
     """Test that genes are sorted by p-value."""
     genes = TwoStagePipeline._filter_genes(
         sample_deg_data,
+        gene_column="gene",
         pvalue_threshold=0.05,
         log2fc_threshold=0.0
     )

@@ -23,6 +23,9 @@ input:
 # Gene Filtering Parameters
 # ============================================
 gene_filter:
+  # 基因名列名（根据你的数据文件调整）
+  gene_column: "Gene"
+
   # P值阈值：保留 pvalue <= threshold 的基因
   pvalue_threshold: 0.05
 

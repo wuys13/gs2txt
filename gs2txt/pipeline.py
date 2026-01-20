@@ -53,6 +53,7 @@ class TwoStagePipeline:
     @staticmethod
     def _filter_genes(
         df: pd.DataFrame,
+        gene_column: str = "Gene",
         pvalue_threshold: float = 0.05,
         log2fc_threshold: float = 1.0,
         pvalue_column: str = "pvalue",
@@ -103,7 +104,7 @@ class TwoStagePipeline:
             result = result.sort_values(pvalue_column)
 
         # Extract gene names
-        genes = result["gene"].dropna().astype(str).tolist()[:max_gene_num]
+        genes = result[gene_column].dropna().astype(str).tolist()[:max_gene_num]
         return genes
 
     @staticmethod
@@ -431,12 +432,13 @@ class TwoStagePipeline:
                 print(f"Warning: Failed to read {deg_file}: {e}")
                 continue
 
-            if "gene" not in deg_df.columns:
-                print(f"Warning: No 'gene' column in {deg_file}, skipping")
+            if config.gene_column not in deg_df.columns:
+                print(f"Warning: No '{config.gene_column}' column in {deg_file}, skipping")
                 continue
 
             genes = TwoStagePipeline._filter_genes(
                 deg_df,
+                gene_column=config.gene_column,
                 pvalue_threshold=config.gene_pvalue_threshold,
                 log2fc_threshold=config.gene_log2fc_threshold,
                 pvalue_column=config.gene_pvalue_column,

@@ -59,6 +59,7 @@ class PipelineConfig:
     pathway_dirs: list[str] = field(default_factory=list)
 
     # Gene filtering
+    gene_column: str = "Gene"
     gene_pvalue_threshold: float = 0.05
     gene_log2fc_threshold: float = 1.0
     gene_pvalue_column: str = "pvalue"
@@ -139,6 +140,7 @@ class PipelineConfig:
             deg_dir=input_config.get("deg_dir"),
             pathway_dirs=input_config.get("pathway_dirs", []),
             # Gene filtering
+            gene_column=gene_filter.get("gene_column", "Gene"),
             gene_pvalue_threshold=gene_filter.get("pvalue_threshold", 0.05),
             gene_log2fc_threshold=gene_filter.get("log2fc_threshold", 1.0),
             gene_pvalue_column=gene_filter.get("pvalue_column", "pvalue"),
@@ -188,6 +190,7 @@ class PipelineConfig:
             }
 
         result["gene_filter"] = {
+            "gene_column": self.gene_column,
             "pvalue_threshold": self.gene_pvalue_threshold,
             "log2fc_threshold": self.gene_log2fc_threshold,
             "pvalue_column": self.gene_pvalue_column,
