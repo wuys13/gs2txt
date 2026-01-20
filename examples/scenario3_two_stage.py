@@ -88,6 +88,8 @@ def run_preprocess_batch(test: bool = False, checkpoint_interval: int = 100):
     TwoStagePipeline.preprocess(
         config_file="config.yaml",
         output_file="intermediate.csv",
+        deg_base_dir="../data",       # DEG文件基础目录，与config中的deg_dir拼接
+        pathway_base_dir="../data",   # 通路文件基础目录，与config中的pathway_dirs拼接
         ppi_context=ppi_context,  # 可选
         test=test,  # 测试模式：只处理前3个文件
         checkpoint_interval=checkpoint_interval  # 每N条保存检查点
