@@ -27,12 +27,19 @@ class TwoStagePipeline:
 
     Examples
     --------
-    >>> # Stage 1: Preprocess (no API needed)
+    >>> # Stage 1: Preprocess with base directories (no API needed)
+    >>> # config.yaml contains: deg_dir="deg/", pathway_dirs=["GO/", "KEGG/"]
     >>> TwoStagePipeline.preprocess(
-    ...     deg_file="deg.csv",
-    ...     enrichment_dir="enrichment/",
+    ...     config_file="config.yaml",
     ...     output_file="intermediate.csv",
-    ...     config_file="config.yaml"
+    ...     deg_base_dir="/data/project1/",      # -> /data/project1/deg/
+    ...     pathway_base_dir="/data/project1/"   # -> /data/project1/GO/, etc.
+    ... )
+
+    >>> # Stage 1: Preprocess with absolute paths in config (backward compatible)
+    >>> TwoStagePipeline.preprocess(
+    ...     config_file="config.yaml",
+    ...     output_file="intermediate.csv"
     ... )
 
     >>> # Stage 2: Annotate (API needed)
@@ -148,178 +155,6 @@ class TwoStagePipeline:
             return terms
 
         return []
-
-    @staticmethod
-    def preprocess(
-        deg_file: str,
-        enrichment_dir: str,
-        output_file: str,
-        config_file: Optional[str] = None,
-        group_column: Optional[str] = "cluster",
-        ppi_context: Optional[dict[str, str]] = None,
-    ) -> pd.DataFrame:
-        """
-        Stage 1: Preprocess DEG and enrichment data.
-
-        Reads differential expression genes and enrichment files,
-        filters them according to config, builds prompts, and saves
-        intermediate results for later annotation.
-
-        Parameters
-        ----------
-        deg_file : str
-            Path to differential expression genes CSV file.
-            Must contain 'gene' column and group_column (e.g., 'cluster').
-            Optional: 'pvalue', 'logFC' columns for filtering.
-        enrichment_dir : str
-            Directory containing enrichment CSV files.
-            Files should be named as {cluster_name}.csv
-            (e.g., cluster_1.csv, cluster_2.csv)
-        output_file : str
-            Path to save intermediate results CSV.
-        config_file : str, optional
-            Path to YAML config file. If None, uses default config.
-        group_column : str, optional
-            Column name for grouping gene sets (default: "cluster").
-            If None, treat the entire file as a single gene set,
-            using the filename (without extension) as the gs name.
-        ppi_context : dict, optional
-            Dictionary mapping cluster names to PPI context strings.
-            Example: {"cluster_1": "Hub genes: TP53, MYC"}
-
-        Returns
-        -------
-        pd.DataFrame
-            Intermediate results with columns:
-            gs, genes, pathways, ppis, final_prompt
-
-        Examples
-        --------
-        >>> # With group column
-        >>> TwoStagePipeline.preprocess(
-        ...     deg_file="deg.csv",
-        ...     enrichment_dir="enrichment/",
-        ...     output_file="intermediate.csv",
-        ...     config_file="config.yaml",
-        ...     group_column="cluster"
-        ... )
-
-        >>> # Without group column (single gene set)
-        >>> TwoStagePipeline.preprocess(
-        ...     deg_file="my_genes.csv",
-        ...     enrichment_dir="enrichment/",
-        ...     output_file="intermediate.csv",
-        ...     group_column=None  # Uses "my_genes" as gs name
-        ... )
-        """
-        # Load config
-        if config_file:
-            config = PipelineConfig.from_yaml(config_file)
-        else:
-            config = PipelineConfig.default()
-
-        # Read DEG file
-        print(f"Reading DEG file: {deg_file}")
-        deg_df = pd.read_csv(deg_file)
-
-        if "gene" not in deg_df.columns:
-            raise ValueError("DEG file must contain a 'gene' column")
-
-        # Handle group_column=None case
-        if group_column is None:
-            # Treat entire file as single gene set, use filename as gs name
-            gs_name = Path(deg_file).stem
-            clusters = [gs_name]
-            # Add a temporary column for unified processing
-            deg_df["_gs_temp_"] = gs_name
-            group_column = "_gs_temp_"
-            print(f"No group column specified, treating as single gene set: {gs_name}")
-        else:
-            if group_column not in deg_df.columns:
-                raise ValueError(f"DEG file must contain '{group_column}' column")
-            # Get unique clusters
-            clusters = deg_df[group_column].unique()
-            print(f"Found {len(clusters)} clusters: {list(clusters)}")
-
-        # Prepare enrichment directory
-        enrichment_path = Path(enrichment_dir)
-        if not enrichment_path.exists():
-            raise FileNotFoundError(f"Enrichment directory not found: {enrichment_dir}")
-
-        # Initialize prompt builder
-        prompt_builder = PromptBuilder()
-
-        # Process each cluster
-        results = []
-        for cluster in tqdm(clusters, desc="Preprocessing clusters"):
-            # Filter genes for this cluster
-            cluster_df = deg_df[deg_df[group_column] == cluster]
-            genes = TwoStagePipeline._filter_genes(
-                cluster_df,
-                pvalue_threshold=config.gene_pvalue_threshold,
-                log2fc_threshold=config.gene_log2fc_threshold,
-                pvalue_column=config.gene_pvalue_column,
-                log2fc_column=config.gene_log2fc_column,
-                max_gene_num=config.max_gene_num,
-            )
-
-            # Skip if no genes after filtering
-            if not genes:
-                print(f"Warning: No genes for cluster '{cluster}' after filtering")
-                results.append({
-                    "gs": cluster,
-                    "genes": "",
-                    "pathways": "",
-                    "ppis": "",
-                    "final_prompt": ""
-                })
-                continue
-
-            # Load enrichment file for this cluster
-            pathways = []
-            enrichment_file = enrichment_path / f"{cluster}.csv"
-            if enrichment_file.exists():
-                enr_df = pd.read_csv(enrichment_file)
-                pathways = TwoStagePipeline._filter_pathways(
-                    enr_df,
-                    pvalue_threshold=config.pathway_pvalue_threshold,
-                    pvalue_column=config.pathway_pvalue_column,
-                    term_column=config.pathway_term_column,
-                    max_pathway_num=config.max_pathway_num,
-                )
-            else:
-                print(f"Warning: Enrichment file not found for '{cluster}': {enrichment_file}")
-
-            # Get PPI context if provided
-            ppi = ""
-            if ppi_context and cluster in ppi_context:
-                ppi = ppi_context[cluster]
-
-            # Build prompt
-            messages = prompt_builder.build(
-                genes=genes,
-                pathways=pathways if pathways else None,
-                additional_context=ppi if ppi else None,
-            )
-            final_prompt = next(
-                (m["content"] for m in messages if m["role"] == "user"), ""
-            )
-
-            # Record result
-            results.append({
-                "gs": cluster,
-                "genes": ",".join(genes),
-                "pathways": ",".join(pathways) if pathways else "",
-                "ppis": ppi,
-                "final_prompt": final_prompt
-            })
-
-        # Create DataFrame and save
-        result_df = pd.DataFrame(results)
-        result_df.to_csv(output_file, index=False)
-        print(f"Intermediate results saved to: {output_file}")
-
-        return result_df
 
     @staticmethod
     def annotate(
@@ -466,15 +301,21 @@ class TwoStagePipeline:
         return result_df
 
     @staticmethod
-    def preprocess_batch(
+    def preprocess(
         config_file: str,
         output_file: str = "intermediate.csv",
+        deg_base_dir: Optional[str] = None,
+        pathway_base_dir: Optional[str] = None,
         ppi_context: Optional[dict[str, str]] = None,
         test: bool = False,
         checkpoint_interval: int = 100,
     ) -> pd.DataFrame:
         """
-        Batch preprocess: Scan DEG folder, find matching pathway files in multiple folders.
+        Stage 1: Preprocess DEG and enrichment data.
+
+        Scans DEG folder, finds matching pathway files in multiple folders,
+        filters them according to config, builds prompts, and saves
+        intermediate results for later annotation.
 
         This method:
         1. Scans deg_dir for all CSV files
@@ -485,9 +326,17 @@ class TwoStagePipeline:
         Parameters
         ----------
         config_file : str
-            Path to YAML config file with input paths
+            Path to YAML config file with input paths (deg_dir, pathway_dirs)
         output_file : str
             Path to save intermediate results CSV
+        deg_base_dir : str, optional
+            Base directory for DEG files. If provided, the final DEG path
+            will be: deg_base_dir / config.deg_dir
+            If None, config.deg_dir is used as-is (backward compatible)
+        pathway_base_dir : str, optional
+            Base directory for pathway files. If provided, the final pathway
+            paths will be: pathway_base_dir / each pathway_dir in config
+            If None, pathway_dirs are used as-is (backward compatible)
         ppi_context : dict, optional
             Dictionary mapping gene set names to PPI context strings
         test : bool
@@ -505,24 +354,27 @@ class TwoStagePipeline:
 
         Examples
         --------
-        >>> # Normal batch processing
-        >>> TwoStagePipeline.preprocess_batch(
+        >>> # With base directories (relative paths in config)
+        >>> # config.yaml contains: deg_dir="deg/", pathway_dirs=["GO/", "KEGG/"]
+        >>> TwoStagePipeline.preprocess(
+        ...     config_file="config.yaml",
+        ...     output_file="intermediate.csv",
+        ...     deg_base_dir="/data/project1/",      # -> /data/project1/deg/
+        ...     pathway_base_dir="/data/project1/"   # -> /data/project1/GO/, etc.
+        ... )
+
+        >>> # Without base directories (absolute paths in config, backward compatible)
+        >>> # config.yaml contains: deg_dir="/abs/path/deg/", pathway_dirs=["/abs/path/GO/"]
+        >>> TwoStagePipeline.preprocess(
         ...     config_file="config.yaml",
         ...     output_file="intermediate.csv"
         ... )
 
         >>> # Test mode: only process first 3 files
-        >>> TwoStagePipeline.preprocess_batch(
+        >>> TwoStagePipeline.preprocess(
         ...     config_file="config.yaml",
         ...     output_file="intermediate.csv",
         ...     test=True
-        ... )
-
-        >>> # Custom checkpoint interval
-        >>> TwoStagePipeline.preprocess_batch(
-        ...     config_file="config.yaml",
-        ...     output_file="intermediate.csv",
-        ...     checkpoint_interval=50  # Save every 50 records
         ... )
         """
         # Load config
@@ -531,22 +383,35 @@ class TwoStagePipeline:
         if not config.deg_dir:
             raise ValueError("deg_dir must be specified in config file")
 
-        deg_path = Path(config.deg_dir)
+        # Resolve DEG directory path
+        if deg_base_dir:
+            deg_path = Path(deg_base_dir) / config.deg_dir
+        else:
+            deg_path = Path(config.deg_dir)
+
         if not deg_path.exists():
-            raise FileNotFoundError(f"DEG directory not found: {config.deg_dir}")
+            raise FileNotFoundError(f"DEG directory not found: {deg_path}")
+
+        # Resolve pathway directory paths
+        resolved_pathway_dirs: list[Path] = []
+        for pdir in config.pathway_dirs:
+            if pathway_base_dir:
+                resolved_pathway_dirs.append(Path(pathway_base_dir) / pdir)
+            else:
+                resolved_pathway_dirs.append(Path(pdir))
 
         # Scan DEG folder for CSV files
         deg_files = sorted(deg_path.glob("*.csv"))
         if not deg_files:
-            raise ValueError(f"No CSV files found in DEG directory: {config.deg_dir}")
+            raise ValueError(f"No CSV files found in DEG directory: {deg_path}")
 
         # Test mode: only process first 3 files
         if test:
             deg_files = deg_files[:3]
-            print(f"Test mode: processing only first 3 files")
+            print("Test mode: processing only first 3 files")
 
-        print(f"Found {len(deg_files)} DEG files in {config.deg_dir}")
-        print(f"Pathway directories: {config.pathway_dirs}")
+        print(f"Found {len(deg_files)} DEG files in {deg_path}")
+        print(f"Pathway directories: {[str(p) for p in resolved_pathway_dirs]}")
 
         # Initialize prompt builder
         prompt_builder = PromptBuilder()
@@ -593,8 +458,8 @@ class TwoStagePipeline:
 
             # Find and merge pathways from all pathway directories
             all_pathways_with_pval = []  # List of (term, pvalue) tuples
-            for pathway_dir in config.pathway_dirs:
-                pathway_file = Path(pathway_dir) / f"{gs_name}.csv"
+            for pathway_dir in resolved_pathway_dirs:
+                pathway_file = pathway_dir / f"{gs_name}.csv"
                 if pathway_file.exists():
                     try:
                         enr_df = pd.read_csv(pathway_file)
@@ -725,3 +590,6 @@ class TwoStagePipeline:
             )
         else:
             raise ValueError(f"Unknown LLM provider: {provider_name}")
+
+    # Alias for backward compatibility
+    preprocess_batch = preprocess
